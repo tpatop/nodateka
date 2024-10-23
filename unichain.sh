@@ -76,6 +76,18 @@ else
   echo "Ошибка: файл .env.sepolia не найден!"
   exit 1
 fi
+# Проверяем, существует ли файл docker-compose.yml
+if [ -f "docker-compose.yml" ]; then
+  echo "Файл docker-compose.yml найден. Замена портов..."
+  sed -i 's|30303:|33303:|g' docker-compose.yml
+  sed -i 's|8545:|8945:|g' docker-compose.yml
+  sed -i 's|8546:|8946:|g' docker-compose.yml
+  echo "Порты успешно заменены."
+else
+  echo "Ошибка: файл docker-compose.yml не найден!"
+  exit 1
+fi
+
 
 echo "Запуск Docker Compose..."
 docker compose up -d
