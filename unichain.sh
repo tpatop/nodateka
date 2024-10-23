@@ -53,4 +53,13 @@ else
   exit 1
 fi
 
-echo "Скрипт выполнен успешно!"
+echo "Установка выполнена успешно!"
+
+# Справочная информация
+echo "Справочная информация:"
+echo "1. Тестовый запрос к ноде:"
+echo '   curl -d '\''{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}'\'' -H "Content-Type: application/json" http://localhost:8545 | jq'
+echo "2. Вывод приватного ключа:"
+echo '   cat ~/unichain-node/geth-data/geth/nodekey'
+echo "3. Логи ноды:"
+echo '   cd ~/unichain-node && docker compose logs -f'
