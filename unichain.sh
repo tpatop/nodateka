@@ -63,3 +63,5 @@ echo "2. Вывод приватного ключа:"
 echo '   cat ~/unichain-node/geth-data/geth/nodekey'
 echo "3. Логи ноды:"
 echo '   cd ~/unichain-node && docker compose logs -f'
+echo "4. Удаление ноды:"
+echo '   cd ~/unichain-node && docker compose down && cd ~ && rm -rf ~/unichain-node'
