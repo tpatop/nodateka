@@ -35,8 +35,8 @@ install_docker() {
 # Функция для установки Docker Compose
 install_docker_compose() {
   echo "Docker Compose не найден. Устанавливаю Docker Compose..."
-  sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -oP '(?<=tag_name": ")[^"]*')" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
+  sudo apt-get update
+  sudo apt-get install -y docker-compose-plugin
   echo "Docker Compose успешно установлен."
 }
 
@@ -48,7 +48,7 @@ else
 fi
 
 # Проверка наличия Docker Compose
-if ! command -v docker-compose &> /dev/null; then
+if ! command -v docker compose &> /dev/null; then
   install_docker_compose
 else
   echo "Docker Compose уже установлен."
@@ -78,7 +78,7 @@ else
 fi
 
 echo "Запуск Docker Compose..."
-docker-compose up -d
+docker compose up -d
 
 # Проверка успешности запуска Docker Compose
 if [ $? -eq 0 ]; then
