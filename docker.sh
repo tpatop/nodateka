@@ -18,6 +18,17 @@ install_docker_compose() {
   echo "Docker Compose успешно установлен."
 }
 
+# Функция для проверки и включения Docker демона
+check_docker_daemon() {
+  if ! sudo systemctl is-active --quiet docker; then
+    echo "Docker демон отключен. Включаю Docker..."
+    sudo systemctl start docker
+    echo "Docker демон успешно запущен."
+  else
+    echo "Docker демон уже запущен."
+  fi
+}
+
 # Проверка наличия Docker
 if ! command -v docker &> /dev/null; then
   install_docker
@@ -26,8 +37,10 @@ else
 fi
 
 # Проверка наличия Docker Compose
-if ! command -v docker compose &> /dev/null; then
+if ! docker compose version &> /dev/null; then
   install_docker_compose
 else
   echo "Docker Compose уже установлен."
 fi
+
+check_docker_daemon
