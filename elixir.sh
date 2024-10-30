@@ -31,9 +31,9 @@ while true; do
             wget https://files.elixir.finance/validator.env
 
             # Запрос данных для заполнения переменных
-            read -p "Введите STRATEGY_EXECUTOR_DISPLAY_NAME: " STRATEGY_EXECUTOR_DISPLAY_NAME
-            read -p "Введите STRATEGY_EXECUTOR_BENEFICIARY: " STRATEGY_EXECUTOR_BENEFICIARY
-            read -p "Введите SIGNER_PRIVATE_KEY: " SIGNER_PRIVATE_KEY
+            read -p "Введите имя вашего валидатора: " STRATEGY_EXECUTOR_DISPLAY_NAME
+            read -p "Введите публичный ключ (с 0х): " STRATEGY_EXECUTOR_BENEFICIARY
+            read -p "Введите приватный ключ (с 0х): " SIGNER_PRIVATE_KEY
 
             # Замена значений в validator.env
             sed -i "s/^STRATEGY_EXECUTOR_DISPLAY_NAME=.*/STRATEGY_EXECUTOR_DISPLAY_NAME=$STRATEGY_EXECUTOR_DISPLAY_NAME/" validator.env
