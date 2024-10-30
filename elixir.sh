@@ -22,7 +22,8 @@ while true; do
         1)
             # Установка узла
             echo "Устанавливаем узел..."
-
+            # Установка пакетов
+            sudo apt install -y curl git jq lz4 build-essential unzip
             # Вызов скрипта для проверки и установки Docker и Docker Compose
             bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/docker.sh)
 
