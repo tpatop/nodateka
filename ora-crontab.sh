@@ -28,6 +28,8 @@ elif [ "$action" -eq 2 ]; then
     # Удаляем задание на перезапуск
     crontab -l | grep -v "~/tora/ora-restart.sh" | crontab -
     echo "Задание для проверки контейнера ora-tora удалено из crontab."
+    rm ~/tora/ora-restart.sh ~/tora/restart.log
+    echo "Скрипт и логи перезапуска успешно удалены."
 
 else
     echo "Неверный выбор. Завершение работы."
