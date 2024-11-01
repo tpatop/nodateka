@@ -16,8 +16,22 @@ download_script() {
 
 # Функция для добавления задания в crontab
 add_cron_job() {
-    (crontab -l 2>/dev/null; echo "$1 ~/tora/ora-restart.sh") | crontab -
-    echo "Задание добавлено в crontab."
+    existing_jobs=$(crontab -l 2>/dev/null | grep "$1 ~/tora/ora-restart.sh")
+
+    if [ -n "$existing_jobs" ]; then
+        echo "Задание уже существует:"
+        echo "$existing_jobs"
+        read -p "Перезаписать это задание? (y/n): " overwrite
+        if [[ "$overwrite" =~ ^[Yy]$ ]]; then
+            (crontab -l 2>/dev/null | grep -v "$1 ~/tora/ora-restart.sh"; echo "$1 ~/tora/ora-restart.sh") | crontab -
+            echo "Задание перезаписано."
+        else
+            echo "Перезапись задания отменена."
+        fi
+    else
+        (crontab -l 2>/dev/null; echo "$1 ~/tora/ora-restart.sh") | crontab -
+        echo "Задание добавлено в crontab."
+    fi
 }
 
 # Функция для удаления задания из crontab
@@ -28,7 +42,7 @@ remove_cron_job() {
 
 # Функция для запроса удаления файлов
 delete_files() {
-    read -p "Удалить скрипт и логи? (y/n): " delete_files
+    read -p "Удалить скрипт и логи? (y/n) (default - n): " delete_files
     if [[ "$delete_files" =~ ^[Yy]$ ]]; then
         rm -f ~/tora/ora-restart.sh ~/tora/restart.log
         echo "Скрипт и логи успешно удалены."
