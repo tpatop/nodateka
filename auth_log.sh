@@ -63,11 +63,36 @@ check_auth_logs() {
     fi
 }
 
+# Функция для установки rsyslog
+install_rsyslog() {
+    echo "Установка rsyslog..."
+    sudo apt update
+    sudo apt install -y rsyslog
+    echo "rsyslog установлен."
+}
+
+# Функция для проверки и запуска службы rsyslog
+check_rsyslog_service() {
+    echo "Проверка состояния службы rsyslog..."
+    if systemctl is-active --quiet rsyslog; then
+        echo "Служба rsyslog уже запущена."
+    else
+        echo "Служба rsyslog не запущена. Запускаем..."
+        sudo systemctl start rsyslog
+        echo "Служба rsyslog запущена."
+    fi
+}
+
 # Основная функция
 main() {
     # Определяем переменные
     SSHD_CONFIG="/etc/ssh/sshd_config"
     RSYSLOG_CONFIG="/etc/rsyslog.conf"
+
+    # Проверка на наличие rsyslog
+    if ! dpkg -l | grep -q rsyslog; then
+        install_rsyslog
+    fi
 
     # Выполняем настройки
     configure_ssh_logging
@@ -79,5 +104,3 @@ main() {
     echo "Настройка завершена."
 }
 
-# Запуск основной функции
-main
