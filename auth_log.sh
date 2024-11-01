@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Определяем переменные
+SSHD_CONFIG="/etc/ssh/sshd_config"
+RSYSLOG_CONFIG="/etc/rsyslog.conf"
+LOG_FILE="/var/log/auth_setup.log"
+
 # Функция для добавления или изменения параметра в конфигурационном файле
 set_param_in_config() {
     local file=$1
@@ -15,80 +20,64 @@ set_param_in_config() {
 
 # Функция для настройки уровня логирования SSH
 configure_ssh_logging() {
-    echo "Настройка логирования SSH..."
+    echo "[$(date)] Настройка логирования SSH..." | tee -a "$LOG_FILE"
     set_param_in_config "$SSHD_CONFIG" "LogLevel" "INFO"
-    echo "Уровень логирования SSH установлен на INFO."
+    echo "[$(date)] Уровень логирования SSH установлен на INFO." | tee -a "$LOG_FILE"
 }
 
 # Функция для перезапуска службы SSH
 restart_ssh_service() {
-    echo "Перезапуск службы SSH..."
+    echo "[$(date)] Перезапуск службы SSH..." | tee -a "$LOG_FILE"
     sudo systemctl restart ssh
-    echo "Служба SSH перезапущена."
+    echo "[$(date)] Служба SSH перезапущена." | tee -a "$LOG_FILE"
+}
+
+# Функция для установки rsyslog
+install_rsyslog() {
+    echo "[$(date)] Установка rsyslog..." | tee -a "$LOG_FILE"
+    sudo apt update
+    sudo apt install -y rsyslog
+    echo "[$(date)] rsyslog установлен." | tee -a "$LOG_FILE"
 }
 
 # Функция для проверки и запуска службы rsyslog
 check_rsyslog_service() {
-    echo "Проверка состояния службы rsyslog..."
+    echo "[$(date)] Проверка состояния службы rsyslog..." | tee -a "$LOG_FILE"
     if systemctl is-active --quiet rsyslog; then
-        echo "Служба rsyslog уже запущена."
+        echo "[$(date)] Служба rsyslog уже запущена." | tee -a "$LOG_FILE"
     else
-        echo "Служба rsyslog не запущена. Запускаем..."
+        echo "[$(date)] Служба rsyslog не запущена. Запускаем..." | tee -a "$LOG_FILE"
         sudo systemctl start rsyslog
-        echo "Служба rsyslog запущена."
+        echo "[$(date)] Служба rsyslog запущена." | tee -a "$LOG_FILE"
     fi
 }
 
 # Функция для настройки rsyslog для логов аутентификации
 configure_rsyslog() {
-    echo "Проверка конфигурации rsyslog на предмет записи логов аутентификации..."
+    echo "[$(date)] Проверка конфигурации rsyslog на предмет записи логов аутентификации..." | tee -a "$LOG_FILE"
     if grep -q "auth,authpriv.* /var/log/auth.log" "$RSYSLOG_CONFIG"; then
-        echo "Конфигурация rsyslog для логов аутентификации найдена."
+        echo "[$(date)] Конфигурация rsyslog для логов аутентификации найдена." | tee -a "$LOG_FILE"
     else
-        echo "Добавляем конфигурацию rsyslog для логов аутентификации..."
+        echo "[$(date)] Добавляем конфигурацию rsyslog для логов аутентификации..." | tee -a "$LOG_FILE"
         echo "auth,authpriv.*                 /var/log/auth.log" | sudo tee -a "$RSYSLOG_CONFIG" > /dev/null
         sudo systemctl restart rsyslog
-        echo "Конфигурация rsyslog обновлена."
+        echo "[$(date)] Конфигурация rsyslog обновлена." | tee -a "$LOG_FILE"
     fi
 }
 
 # Функция для проверки наличия логов аутентификации
 check_auth_logs() {
-    echo "Проверка наличия логов аутентификации..."
+    echo "[$(date)] Проверка наличия логов аутентификации..." | tee -a "$LOG_FILE"
     if [ -f /var/log/auth.log ]; then
-        echo "Логи аутентификации доступны:"
-        tail -n 10 /var/log/auth.log
+        echo "[$(date)] Логи аутентификации доступны:" | tee -a "$LOG_FILE"
+        tail -n 10 /var/log/auth.log | tee -a "$LOG_FILE"
     else
-        echo "Логи аутентификации не найдены."
-    fi
-}
-
-# Функция для установки rsyslog
-install_rsyslog() {
-    echo "Установка rsyslog..."
-    sudo apt update
-    sudo apt install -y rsyslog
-    echo "rsyslog установлен."
-}
-
-# Функция для проверки и запуска службы rsyslog
-check_rsyslog_service() {
-    echo "Проверка состояния службы rsyslog..."
-    if systemctl is-active --quiet rsyslog; then
-        echo "Служба rsyslog уже запущена."
-    else
-        echo "Служба rsyslog не запущена. Запускаем..."
-        sudo systemctl start rsyslog
-        echo "Служба rsyslog запущена."
+        echo "[$(date)] Логи аутентификации не найдены." | tee -a "$LOG_FILE"
     fi
 }
 
 # Основная функция
 main() {
-    # Определяем переменные
-    SSHD_CONFIG="/etc/ssh/sshd_config"
-    RSYSLOG_CONFIG="/etc/rsyslog.conf"
-
     # Проверка на наличие rsyslog
     if ! dpkg -l | grep -q rsyslog; then
         install_rsyslog
@@ -101,6 +90,8 @@ main() {
     configure_rsyslog
     check_auth_logs
 
-    echo "Настройка завершена."
+    echo "[$(date)] Настройка завершена." | tee -a "$LOG_FILE"
 }
 
+# Запуск основной функции
+main
