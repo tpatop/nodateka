@@ -59,10 +59,10 @@ change_settings() {
     
     read -rp "Введите количество попыток перед блокировкой (maxretry): " maxretry
     read -rp "Введите время отслеживания (findtime, в секундах): " findtime
-
-    # Запрос времени блокировки с умолчанием на постоянную блокировку
     read -rp "Введите время блокировки (bantime) в секундах (по умолчанию -1 для постоянной блокировки): " bantime
-    bantime="${bantime:--1}"  # Устанавливаем значение -1 по умолчанию, если ничего не введено
+    maxretry="${maxretry:-3}"
+    findtime="${findtime:-3600}"
+    bantime="${bantime:--1}"  # Устанавливаем значение -1 по умолчанию
 
     # Применение изменений в jail.local
     sed -i "/maxretry/c\maxretry = $maxretry" "$jail_local"
