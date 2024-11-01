@@ -16,20 +16,22 @@ download_script() {
 
 # Функция для добавления задания в crontab
 add_cron_job() {
-    existing_jobs=$(crontab -l 2>/dev/null | grep "$1 ~/tora/ora-restart.sh")
+    cron_job="$1 ~/tora/ora-restart.sh"
+    existing_jobs=$(crontab -l 2>/dev/null | grep -E ".*$cron_job")
 
     if [ -n "$existing_jobs" ]; then
         echo "Задание уже существует:"
         echo "$existing_jobs"
         read -p "Перезаписать это задание? (y/n): " overwrite
         if [[ "$overwrite" =~ ^[Yy]$ ]]; then
-            (crontab -l 2>/dev/null | grep -v "$1 ~/tora/ora-restart.sh"; echo "$1 ~/tora/ora-restart.sh") | crontab -
+            # Удаляем старое задание и добавляем новое
+            (crontab -l 2>/dev/null | grep -v "$cron_job"; echo "$cron_job") | crontab -
             echo "Задание перезаписано."
         else
             echo "Перезапись задания отменена."
         fi
     else
-        (crontab -l 2>/dev/null; echo "$1 ~/tora/ora-restart.sh") | crontab -
+        (crontab -l 2>/dev/null; echo "$cron_job") | crontab -
         echo "Задание добавлено в crontab."
     fi
 }
