@@ -1,36 +1,81 @@
 #!/bin/bash
 
-# Вызов скрипта для вывода имени
 bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
 
-# Скачиваем файл ora-restart.sh в папку ~/tora, если его еще нет
-if [ ! -f ~/tora/ora-restart.sh ]; then
-    mkdir -p ~/tora
-    wget -O ~/tora/ora-restart.sh https://raw.githubusercontent.com/tpatop/nodateka/main/ora-restart.sh
-    chmod +x ~/tora/ora-restart.sh
-    echo "Скрипт ora-restart.sh успешно скачан и установлен как исполняемый."
-else
-    echo "Скрипт ora-restart.sh уже существует."
-fi
+# Функция для скачивания скрипта ora-restart.sh, если его еще нет
+download_script() {
+    if [ ! -f ~/tora/ora-restart.sh ]; then
+        mkdir -p ~/tora
+        wget -O ~/tora/ora-restart.sh https://raw.githubusercontent.com/tpatop/nodateka/main/ora-restart.sh
+        chmod +x ~/tora/ora-restart.sh
+        echo "Скрипт ora-restart.sh успешно скачан и установлен как исполняемый."
+    else
+        echo "Скрипт ora-restart.sh уже существует."
+    fi
+}
 
-# Выбор действия
-echo "Выберите действие:"
-echo "1. Создать проверку контейнера каждый час."
-echo "2. Удалить проверку контейнера из crontab."
-read -p "Введите номер действия (1 или 2): " action
+# Функция для добавления задания в crontab
+add_cron_job() {
+    (crontab -l 2>/dev/null; echo "$1 ~/tora/ora-restart.sh") | crontab -
+    echo "Задание добавлено в crontab."
+}
 
-if [ "$action" -eq 1 ]; then
-    # Добавляем задание в crontab для перезапуска контейнера
-    (crontab -l 2>/dev/null; echo "0 * * * * ~/tora/ora-restart.sh") | crontab -
-    echo "Задание для проверки контейнера ora-tora добавлено в crontab и будет выполняться каждый час."
-
-elif [ "$action" -eq 2 ]; then
-    # Удаляем задание на перезапуск
+# Функция для удаления задания из crontab
+remove_cron_job() {
     crontab -l | grep -v "~/tora/ora-restart.sh" | crontab -
-    echo "Задание для проверки контейнера ora-tora удалено из crontab."
-    rm ~/tora/ora-restart.sh ~/tora/restart.log
-    echo "Скрипт и логи перезапуска успешно удалены."
+    echo "Задание для автоматического перезапуска контейнера удалено из crontab."
+}
 
-else
-    echo "Неверный выбор. Завершение работы."
-fi
+# Функция для запроса удаления файлов
+delete_files() {
+    read -p "Удалить скрипт и логи? (y/n): " delete_files
+    if [[ "$delete_files" =~ ^[Yy]$ ]]; then
+        rm -f ~/tora/ora-restart.sh ~/tora/restart.log
+        echo "Скрипт и логи успешно удалены."
+    fi
+}
+
+# Основное меню
+echo "Выберите действие:"
+echo "1. Запуск проверки контейнера в определенное время."
+echo "2. Запуск проверки контейнера каждые X часов."
+echo "3. Удалить настройку автоматического перезапуска."
+echo "0. Выход."
+read -p "Введите номер действия (1, 2, 3 или 0): " action
+
+case "$action" in
+    1)
+        # Установка запуска в определенное время
+        download_script
+        read -p "Введите время в формате ЧЧ:ММ для запуска скрипта (например, 03:00): " schedule_time
+        cron_time="${schedule_time} * * * *"
+        add_cron_job "$cron_time"
+        echo "Задание на запуск проверки контейнера в $schedule_time добавлено в crontab."
+        ;;
+    2)
+        # Установка запуска каждые X часов
+        download_script
+        while true; do
+            read -p "Введите интервал в часах для запуска скрипта (1-20): " interval_hours
+            if [[ "$interval_hours" =~ ^[1-9]$ || "$interval_hours" =~ ^1[0-9]$ || "$interval_hours" == "20" ]]; then
+                break
+            else
+                echo "Ошибка: интервал должен быть числом от 1 до 20. Пожалуйста, попробуйте снова."
+            fi
+        done
+        cron_time="0 */$interval_hours * * *"
+        add_cron_job "$cron_time"
+        echo "Задание на запуск проверки контейнера каждые $interval_hours часа(ов) добавлено в crontab."
+        ;;
+    3)
+        # Удаление задания из crontab и запрос на удаление файлов
+        remove_cron_job
+        delete_files
+        ;;
+    0)
+        echo "Выход из программы."
+        ;;
+    *)
+        echo "Неверный выбор. Завершение работы."
+        ;;
+esac
