@@ -6,14 +6,17 @@ bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
 
 # Функция установки Fail2ban
 install_fail2ban() {
-    echo -e "\n⏳ Установка Fail2ban..."
-    apt update && apt install -y fail2ban
-    if ! command -v fail2ban-server > /dev/null; then
-        echo "❌ Ошибка: Fail2ban не установлен. Проверьте подключение к интернету и повторите попытку."
-        exit 1
+    echo "🔍 Проверка наличия Fail2ban..."
+    if dpkg -l | grep -q fail2ban; then
+        echo "⚠️ Fail2ban уже установлен. Пропускаем установку."
+    else
+        echo "🛠️ Установка Fail2ban..."
+        sudo apt update
+        sudo apt install -y fail2ban
+        echo "✅ Fail2ban успешно установлен."
     fi
-    echo "✅ Fail2ban успешно установлен."
 }
+
 
 # Функция для создания конфигурационного файла джейла SSH
 create_jail_local() {
