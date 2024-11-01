@@ -1,5 +1,7 @@
 #!/bin/bash
 
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
+
 # Скрипт управления Fail2ban для защиты SSH
 
 # Функция установки Fail2ban
@@ -24,9 +26,9 @@ enabled = true
 port = ssh
 filter = sshd
 logpath = /var/log/auth.log
-maxretry = 5
-findtime = 600
-bantime = 3600
+maxretry = 3
+findtime = 6000
+bantime = 36000
 EOL
 
     echo "✅ Конфигурация для sshd создана."
