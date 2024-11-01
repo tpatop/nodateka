@@ -28,6 +28,7 @@ add_cron_job() {
         (crontab -l 2>/dev/null; echo "$cron_job") | crontab -
         echo "Задание добавлено в crontab."
     fi
+    echo "Посмотреть задания: crontab -l"
 }
 
 # Функция для удаления задания из crontab
@@ -62,7 +63,6 @@ case "$action" in
         IFS=: read hour minute <<< "$schedule_time"
         cron_time="$minute $hour * * *"
         add_cron_job "$cron_time"
-        echo "Задание на запуск проверки контейнера в $schedule_time добавлено в crontab."
         ;;
     2)
         # Установка запуска каждые X часов
@@ -77,7 +77,6 @@ case "$action" in
         done
         cron_time="0 */$interval_hours * * *"
         add_cron_job "$cron_time"
-        echo "Задание на запуск проверки контейнера каждые $interval_hours часа(ов) добавлено в crontab."
         ;;
     3)
         # Удаление задания из crontab и запрос на удаление файлов
