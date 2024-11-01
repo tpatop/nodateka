@@ -47,8 +47,10 @@ case "$action" in
     1)
         # Установка запуска в определенное время
         download_script
-        read -p "Введите время в формате ЧЧ:ММ для запуска скрипта (например, 03:00): " schedule_time
-        cron_time="${schedule_time} * * * *"
+        read -p "Введите время в формате ЧЧ:ММ для запуска скрипта (например, 04:15): " schedule_time
+        # Разделяем введенное время на часы и минуты
+        IFS=: read hour minute <<< "$schedule_time"
+        cron_time="$minute $hour * * *"
         add_cron_job "$cron_time"
         echo "Задание на запуск проверки контейнера в $schedule_time добавлено в crontab."
         ;;
