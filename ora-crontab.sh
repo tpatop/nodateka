@@ -68,11 +68,11 @@ case "$action" in
         # Установка запуска каждые X часов
         download_script
         while true; do
-            read -p "Введите интервал в часах для запуска скрипта (1-20): " interval_hours
-            if [[ "$interval_hours" =~ ^[1-9]$ || "$interval_hours" =~ ^1[0-9]$ || "$interval_hours" == "20" ]]; then
+            read -p "Введите интервал в часах для запуска скрипта (1-8): " interval_hours
+            if [[ "$interval_hours" =~ ^[1-9]$ || "$interval_hours" =~ ^1[0-9]$ || "$interval_hours" == "12" ]]; then
                 break
             else
-                echo "Ошибка: интервал должен быть числом от 1 до 20. Пожалуйста, попробуйте снова."
+                echo "Ошибка: интервал должен быть числом от 1 до 12. Пожалуйста, попробуйте снова."
             fi
         done
         cron_time="0 */$interval_hours * * *"
