@@ -54,13 +54,18 @@ check_jail_status() {
 change_settings() {
     local jail_local="/etc/fail2ban/jail.local"
     echo -e "\n⚙️ Изменение настроек джейла sshd:"
+    
     read -rp "Введите количество попыток перед блокировкой (maxretry): " maxretry
     read -rp "Введите время отслеживания (findtime, в секундах): " findtime
-    read -rp "Введите время блокировки (bantime, в секундах): " bantime
 
-    sed -i "/maxretry/c\maxretry = $maxretry" $jail_local
-    sed -i "/findtime/c\findtime = $findtime" $jail_local
-    sed -i "/bantime/c\bantime = $bantime" $jail_local
+    # Запрос времени блокировки с умолчанием на постоянную блокировку
+    read -rp "Введите время блокировки (bantime) в секундах (по умолчанию -1 для постоянной блокировки): " bantime
+    bantime="${bantime:--1}"  # Устанавливаем значение -1 по умолчанию, если ничего не введено
+
+    # Применение изменений в jail.local
+    sed -i "/maxretry/c\maxretry = $maxretry" "$jail_local"
+    sed -i "/findtime/c\findtime = $findtime" "$jail_local"
+    sed -i "/bantime/c\bantime = $bantime" "$jail_local"
 
     echo -e "\n✅ Новые параметры сохранены в $jail_local:"
     echo "maxretry = $maxretry, findtime = $findtime, bantime = $bantime"
