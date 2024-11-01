@@ -1,8 +1,11 @@
 #!/bin/bash
+# Скрипт управления Fail2ban для защиты SSH
 
+# Логотип команды
 bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
 
-# Скрипт управления Fail2ban для защиты SSH
+# Установка и настройка логирования, если отсутствует
+bash <(https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/auth_log.sh)
 
 # Функция установки Fail2ban
 install_fail2ban() {
