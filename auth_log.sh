@@ -36,9 +36,11 @@ restart_ssh_service() {
 install_rsyslog() {
     echo "[$(date)] Установка rsyslog..." | tee -a "$LOG_FILE"
     sudo apt update
-    sudo apt install -y rsyslog
+    # Используем DEBIAN_FRONTEND=noninteractive для установки без интерактивных запросов
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y rsyslog
     echo "[$(date)] rsyslog установлен." | tee -a "$LOG_FILE"
 }
+
 
 # Функция для проверки и запуска службы rsyslog
 check_rsyslog_service() {
