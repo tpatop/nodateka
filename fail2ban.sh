@@ -57,12 +57,15 @@ change_settings() {
     local jail_local="/etc/fail2ban/jail.local"
     echo -e "\n⚙️ Изменение настроек джейла sshd:"
     
-    read -rp "Введите количество попыток перед блокировкой (maxretry): " maxretry
-    read -rp "Введите время отслеживания (findtime, в секундах): " findtime
-    read -rp "Введите время блокировки (bantime) в секундах (по умолчанию -1 для постоянной блокировки): " bantime
+    # Запрос значений у пользователя с указанием значений по умолчанию
+    read -rp "Введите количество попыток перед блокировкой (maxretry) [3]: " maxretry
+    read -rp "Введите время отслеживания (findtime, в секундах) [3600]: " findtime
+    read -rp "Введите время блокировки (bantime, по умолчанию -1 для постоянной блокировки): " bantime
+
+    # Применяем значения по умолчанию, если пользователь оставил поле пустым
     maxretry="${maxretry:-3}"
     findtime="${findtime:-3600}"
-    bantime="${bantime:--1}"  # Устанавливаем значение -1 по умолчанию
+    bantime="${bantime:--1}"  # Постоянная блокировка по умолчанию
 
     # Применение изменений в jail.local
     sed -i "/maxretry/c\maxretry = $maxretry" "$jail_local"
@@ -74,6 +77,7 @@ change_settings() {
 
     restart_fail2ban
 }
+
 
 # Функция меню
 show_menu() {
