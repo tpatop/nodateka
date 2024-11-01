@@ -1,75 +1,112 @@
 #!/bin/bash
 
-# Вызов скрипта для вывода имени
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
+# Скрипт управления Fail2ban для защиты SSH
 
-# Функция для отображения меню
-show_menu() {
-    echo ""
-    echo "Выберите действие:"
-    echo "1. Установить узел"
-    echo "2. Обновить узел"
-    echo "3. Мониторинг работы узла"
-    echo "0. Выход"
-    read -p "Введите номер действия (1, 2, 3 или 0): " action
+# Функция установки Fail2ban
+install_fail2ban() {
+    echo -e "\n⏳ Установка Fail2ban..."
+    apt update && apt install -y fail2ban
+    if ! command -v fail2ban-server > /dev/null; then
+        echo "❌ Ошибка: Fail2ban не установлен. Проверьте подключение к интернету и повторите попытку."
+        exit 1
+    fi
+    echo "✅ Fail2ban успешно установлен."
 }
 
-# Основной цикл для работы меню
-while true; do
-    show_menu
+# Функция для создания конфигурационного файла джейла SSH
+create_jail_local() {
+    local jail_local="/etc/fail2ban/jail.local"
+    echo -e "\n📁 Создание конфигурационного файла $jail_local..."
 
-    case "$action" in
+    cat <<EOL > $jail_local
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+findtime = 600
+bantime = 3600
+EOL
+
+    echo "✅ Конфигурация для sshd создана."
+}
+
+# Функция перезапуска Fail2ban
+restart_fail2ban() {
+    echo -e "\n🔄 Перезапуск Fail2ban..."
+    systemctl restart fail2ban
+    if systemctl is-active --quiet fail2ban; then
+        echo "✅ Fail2ban успешно запущен."
+    else
+        echo "❌ Ошибка: Fail2ban не удалось запустить. Проверьте конфигурацию."
+        exit 1
+    fi
+}
+
+# Функция проверки статуса джейла sshd
+check_jail_status() {
+    echo -e "\nℹ️ Проверка статуса джейла sshd..."
+    fail2ban-client status sshd
+}
+
+# Функция изменения параметров конфигурации
+change_settings() {
+    local jail_local="/etc/fail2ban/jail.local"
+    echo -e "\n⚙️ Изменение настроек джейла sshd:"
+    read -rp "Введите количество попыток перед блокировкой (maxretry): " maxretry
+    read -rp "Введите время отслеживания (findtime, в секундах): " findtime
+    read -rp "Введите время блокировки (bantime, в секундах): " bantime
+
+    sed -i "/maxretry/c\maxretry = $maxretry" $jail_local
+    sed -i "/findtime/c\findtime = $findtime" $jail_local
+    sed -i "/bantime/c\bantime = $bantime" $jail_local
+
+    echo -e "\n✅ Новые параметры сохранены в $jail_local:"
+    echo "maxretry = $maxretry, findtime = $findtime, bantime = $bantime"
+
+    restart_fail2ban
+}
+
+# Функция меню
+show_menu() {
+    echo -e "\n==============================="
+    echo "    Выберите действие:"
+    echo "==============================="
+    echo "1. 🛠 Установка Fail2ban"
+    echo "2. 📊 Проверка статуса джейла sshd"
+    echo "3. ⚙️  Изменение настроек (maxretry, findtime, bantime)"
+    echo "0. 🚪 Выход"
+    echo "==============================="
+    read -rp "Ваш выбор: " choice
+    case $choice in
         1)
-            # Установка узла
-            echo "Устанавливаем узел..."
-            # Установка пакетов
-            sudo apt install -y curl git jq lz4 build-essential unzip
-            # Вызов скрипта для проверки и установки Docker и Docker Compose
-            bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/docker.sh)
-
-            # Создание каталога и загрузка файла конфигурации
-            mkdir ~/elixir && cd ~/elixir
-            wget https://files.elixir.finance/validator.env
-
-            # Запрос данных для заполнения переменных
-            read -p "Введите имя вашего валидатора: " STRATEGY_EXECUTOR_DISPLAY_NAME
-            read -p "Введите публичный ключ (с 0х): " STRATEGY_EXECUTOR_BENEFICIARY
-            read -p "Введите приватный ключ (с 0х): " SIGNER_PRIVATE_KEY
-
-            # Замена значений в validator.env
-            sed -i "s/^STRATEGY_EXECUTOR_DISPLAY_NAME=.*/STRATEGY_EXECUTOR_DISPLAY_NAME=$STRATEGY_EXECUTOR_DISPLAY_NAME/" validator.env
-            sed -i "s/^STRATEGY_EXECUTOR_BENEFICIARY=.*/STRATEGY_EXECUTOR_BENEFICIARY=$STRATEGY_EXECUTOR_BENEFICIARY/" validator.env
-            sed -i "s/^SIGNER_PRIVATE_KEY=.*/SIGNER_PRIVATE_KEY=$SIGNER_PRIVATE_KEY/" validator.env
-
-            # Запуск Docker-контейнера
-            docker pull elixirprotocol/validator:v3
-            docker run -d --env-file ~/elixir/validator.env --name elixir --platform linux/amd64 elixirprotocol/validator:v3
+            install_fail2ban
+            create_jail_local
+            restart_fail2ban
             ;;
-        
         2)
-            # Обновление узла
-            echo "Обновляем узел..."
-
-            # Удаление существующего контейнера и загрузка новой версии
-            docker rm -f elixir
-            docker pull elixirprotocol/validator:v3
-            docker run -d --env-file ~/elixir/validator.env --name elixir --platform linux/amd64 elixirprotocol/validator:v3
+            check_jail_status
             ;;
-
         3)
-            # Мониторинг работы узла
-            echo "Запуск мониторинга работы узла..."
-            docker logs -f elixir
+            change_settings
             ;;
-
         0)
-            # Выход
-            echo "Завершение работы."
+            echo "👋 Выход..."
             exit 0
             ;;
-
         *)
-            echo "Неверный выбор. Пожалуйста, попробуйте снова."
+            echo "❌ Неверный выбор, попробуйте снова."
             ;;
     esac
-done
+}
+
+# Главная функция
+main() {
+    while true; do
+        show_menu
+    done
+}
+
+# Запуск главной функции
+main
