@@ -68,7 +68,7 @@ case "$action" in
         # Установка запуска каждые X часов
         download_script
         while true; do
-            read -p "Введите интервал в часах для запуска скрипта (1-8): " interval_hours
+            read -p "Введите интервал в часах для запуска скрипта (1-12): " interval_hours
             if [[ "$interval_hours" =~ ^[1-9]$ || "$interval_hours" =~ ^1[0-9]$ || "$interval_hours" == "12" ]]; then
                 break
             else
