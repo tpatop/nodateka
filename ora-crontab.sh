@@ -16,7 +16,7 @@ download_script() {
 
 # Функция для добавления задания в crontab
 add_cron_job() {
-    cron_job="$1 ora-restart.sh"
+    cron_job="$1 ~/tora/ora-restart.sh"
     existing_jobs=$(crontab -l |grep ora-restart.sh)
     
     if [ -n "$existing_jobs" ]; then
