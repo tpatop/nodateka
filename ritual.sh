@@ -174,10 +174,50 @@ call_contract() {
     fi
 }
 
+# Функция для замены RPC URL
+replace_rpc_url() {
+    if confirm "Заменить RPC URL?"; then
+        read -p "Введите новый RPC URL: " NEW_RPC_URL
+
+        CONFIG_PATHS=(
+            "/root/infernet-container-starter/projects/hello-world/container/config.json"
+            "/root/infernet-container-starter/deploy/config.json"
+            "/root/infernet-container-starter/projects/hello-world/contracts/Makefile"
+        )
+
+        for config_path in "${CONFIG_PATHS[@]}"; do
+            if [[ -f "$config_path" ]]; then
+                sed -i "s|https://mainnet.base.org|$NEW_RPC_URL|g" "$config_path"
+                echo "RPC URL заменен в $config_path"
+            else
+                echo "Файл $config_path не найден, пропускаем."
+            fi
+        done
+
+        # Используем функцию перезапуска контейнеров
+        restart_docker_containers
+        echo "Контейнеры перезапущены после замены RPC URL."
+    else
+        echo "Замена RPC URL отменена."
+    fi
+}
+
+# Функция для удаления ноды
+delete_node() {
+    if confirm "Удалить ноду и очистить файлы?"; then
+        echo "Удаление ноды и очистка файлов..."
+        cd /root && docker compose -f infernet-container-starter/deploy/docker-compose.yaml down
+        cd && rm -rf infernet-container-starter
+        echo "Нода удалена и файлы очищены."
+    else
+        echo "Удаление ноды отменено."
+    fi
+}
+
 show_menu() {
     echo "Выберите действие:"
     echo "1. Установка ноды"
-    echo "2. Логи ноды (docker logs -f --tail 20 infernet-node)"
+    echo "2. Логи ноды infernet-node"
     echo "0. Выход"
 }
 
@@ -201,6 +241,14 @@ handle_choice() {
             echo "Отображение логов ноды..."
             docker logs -f --tail 20 infernet-node
             ;;
+        3)
+            echo "Замена RPC URL..."
+            replace_rpc_url
+            ;;
+        del)
+            echo "Удаление ноды..."
+            delete_node
+            ;;
         0)
             echo "Выход..."
             exit 0
@@ -214,7 +262,7 @@ handle_choice() {
 # Основной цикл меню
 while true; do
     show_menu
-    read -p "Введите номер действия: " choice
+    read -p "Ваш выбор: " action
     handle_choice "$choice"
 done
 
