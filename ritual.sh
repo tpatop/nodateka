@@ -185,14 +185,24 @@ replace_rpc_url() {
             "/root/infernet-container-starter/projects/hello-world/contracts/Makefile"
         )
 
+        # Переменная для отслеживания найденных файлов
+        files_found=false
+
         for config_path in "${CONFIG_PATHS[@]}"; do
             if [[ -f "$config_path" ]]; then
                 sed -i "s|https://mainnet.base.org|$NEW_RPC_URL|g" "$config_path"
                 echo "RPC URL заменен в $config_path"
+                files_found=true  # Устанавливаем флаг, если файл найден
             else
                 echo "Файл $config_path не найден, пропускаем."
             fi
         done
+
+        # Если не найдено ни одного файла, выводим сообщение
+        if ! $files_found; then
+            echo "Не удалось найти ни одного конфигурационного файла для замены RPC URL."
+            return  # Завершаем выполнение функции
+        fi
 
         # Используем функцию перезапуска контейнеров
         restart_docker_containers
