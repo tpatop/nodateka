@@ -71,6 +71,7 @@ configure_files() {
 
     # Изменение порта в docker-compose.yaml
     sed -i 's|4000:|5000:|' "$DOCKER_COMPOSE_PATH"
+    sed -i 's|8545:|5001:|' "$DOCKER_COMPOSE_PATH"
 
     cp "$CONFIG_PATH" "$HELLO_CONFIG_PATH"
     sed -i "s|address registry =.*|address registry = 0x3B1554f346DFe5c482Bb4BA31b880c1C18412170;|" "$DEPLOY_SCRIPT_PATH"
@@ -147,20 +148,22 @@ deploy_contract() {
         echo "Пропущено развертывание контракта."
     fi
 }
-# Функция для замены адреса контракта
+# Запрос
 call_contract() {
-    read -p "Введите Contract Address: " CONTRACT_ADDRESS
-    echo "Заменяем старый номер в CallsContract.s.sol..."
-    sed -i "s|SaysGM(.*)|SaysGM($CONTRACT_ADDRESS)|" ~/infernet-container-starter/projects/hello-world/contracts/script/CallContract.s.sol
-    echo "Выполняем команду project=hello-world make call-contract..."
-    project=hello-world make call-contract
+    if confirm "Вызвать новый запрос?"; then
+        read -p "Введите Contract Address: " CONTRACT_ADDRESS
+        echo "Заменяем старый номер в CallsContract.s.sol..."
+        sed -i "s|SaysGM(.*)|SaysGM($CONTRACT_ADDRESS)|" ~/infernet-container-starter/projects/hello-world/contracts/script/CallContract.s.sol
+        echo "Выполняем команду project=hello-world make call-contract..."
+        project=hello-world make call-contract
+    else
+        echo "Пропущен вызов запроса."
+    fi
 }
 
 # Функция для замены RPC URL
 replace_rpc_url() {
-    echo "Заменить RPC URL?"
     read -p "Введите новый RPC URL: " NEW_RPC_URL
-
     CONFIG_PATHS=(
         "/root/infernet-container-starter/projects/hello-world/container/config.json"
         "/root/infernet-container-starter/deploy/config.json"
