@@ -218,7 +218,7 @@ delete_node() {
 show_menu() {
     echo "Выберите действие:"
     echo "1. Установка ноды"
-    echo "2. Логи ноды (docker logs -f --tail 20 infernet-node)"
+    echo "2. Логи ноды"
     echo "3. Замена RPC"
     echo "del. Удаление ноды"
     echo "0. Выход"
