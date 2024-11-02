@@ -112,10 +112,29 @@ install_foundry() {
 # Функция для установки зависимостей проекта
 install_project_dependencies() {
     echo "Установка зависимостей для hello-world проекта..."
-    source ~/.bashrc
+
+    # Проверка наличия forge
+    if [ ! -f "$HOME/.foundry/bin/forge" ]; then
+        echo "forge не найден в $HOME/.foundry/bin. Пожалуйста, убедитесь, что Foundry установлен."
+        return 1
+    fi
+
+    # Указываем путь к forge и продолжаем установку
+    FORGE_PATH="$HOME/.foundry/bin/forge"
+    echo "Используем forge из $FORGE_PATH"
+
+    # Переход в нужный каталог
     cd /root/infernet-container-starter/projects/hello-world/contracts || exit
-    forge install --no-commit foundry-rs/forge-std || { echo "Ошибка при установке зависимости forge-std. Устраняем..."; rm -rf lib/forge-std && forge install --no-commit foundry-rs/forge-std; }
-    forge install --no-commit ritual-net/infernet-sdk || { echo "Ошибка при установке зависимости infernet-sdk. Устраняем..."; rm -rf lib/infernet-sdk && forge install --no-commit ritual-net/infernet-sdk; }
+
+    # Установка зависимостей с явным указанием пути до forge
+    "$FORGE_PATH" install --no-commit foundry-rs/forge-std || { 
+        echo "Ошибка при установке зависимости forge-std. Устраняем...";
+        rm -rf lib/forge-std && "$FORGE_PATH" install --no-commit foundry-rs/forge-std;
+    }
+    "$FORGE_PATH" install --no-commit ritual-net/infernet-sdk || { 
+        echo "Ошибка при установке зависимости infernet-sdk. Устраняем..."; 
+        rm -rf lib/infernet-sdk && "$FORGE_PATH" install --no-commit ritual-net/infernet-sdk;
+    }
 }
 
 # Функция для развертывания контракта
