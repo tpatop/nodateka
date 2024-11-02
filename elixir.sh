@@ -26,18 +26,20 @@ install_node() {
 
     # Создание каталога и загрузка файла конфигурации
     mkdir ~/elixir && cd ~/elixir
-    wget https://files.elixir.finance/validator.env
-
-    # Запрос данных для заполнения переменных
-    read -p "Введите STRATEGY_EXECUTOR_DISPLAY_NAME: " STRATEGY_EXECUTOR_DISPLAY_NAME
-    read -p "Введите STRATEGY_EXECUTOR_BENEFICIARY: " STRATEGY_EXECUTOR_BENEFICIARY
-    read -p "Введите SIGNER_PRIVATE_KEY: " SIGNER_PRIVATE_KEY
-
-    # Замена значений в validator.env
-    sed -i "s/^STRATEGY_EXECUTOR_DISPLAY_NAME=.*/STRATEGY_EXECUTOR_DISPLAY_NAME=$STRATEGY_EXECUTOR_DISPLAY_NAME/" validator.env
-    sed -i "s/^STRATEGY_EXECUTOR_BENEFICIARY=.*/STRATEGY_EXECUTOR_BENEFICIARY=$STRATEGY_EXECUTOR_BENEFICIARY/" validator.env
-    sed -i "s/^SIGNER_PRIVATE_KEY=.*/SIGNER_PRIVATE_KEY=$SIGNER_PRIVATE_KEY/" validator.env
-
+    
+    # Загрузка файла конфигурации, если его нет
+    if [ ! -f validator.env ]; then
+        wget https://files.elixir.finance/validator.env
+        read -p "Введите STRATEGY_EXECUTOR_DISPLAY_NAME: " STRATEGY_EXECUTOR_DISPLAY_NAME
+        read -p "Введите STRATEGY_EXECUTOR_BENEFICIARY: " STRATEGY_EXECUTOR_BENEFICIARY
+        read -p "Введите SIGNER_PRIVATE_KEY: " SIGNER_PRIVATE_KEY
+        # Замена значений в validator.env
+        sed -i "s/^STRATEGY_EXECUTOR_DISPLAY_NAME=.*/STRATEGY_EXECUTOR_DISPLAY_NAME=$STRATEGY_EXECUTOR_DISPLAY_NAME/" validator.env
+        sed -i "s/^STRATEGY_EXECUTOR_BENEFICIARY=.*/STRATEGY_EXECUTOR_BENEFICIARY=$STRATEGY_EXECUTOR_BENEFICIARY/" validator.env
+        sed -i "s/^SIGNER_PRIVATE_KEY=.*/SIGNER_PRIVATE_KEY=$SIGNER_PRIVATE_KEY/" validator.env
+    else
+        echo "Файл validator.env уже существует. Пропуск загрузки."
+    fi
     # Скачивание образа
     docker pull elixirprotocol/validator:v3
 
