@@ -24,27 +24,38 @@ install_node() {
     # Вызов скрипта для проверки и установки Docker и Docker Compose
     bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/docker.sh)
 
-    # Создание каталога и загрузка файла конфигурации
-    mkdir ~/elixir && cd ~/elixir
-    
-    # Загрузка файла конфигурации, если его нет
+    # Создание каталога ~/elixir, если он не существует, и переход в него
+    mkdir -p ~/elixir && cd ~/elixir
+
+    # Проверка на наличие файла конфигурации validator.env
     if [ ! -f validator.env ]; then
+        echo "Загружаем файл validator.env..."
+        
+        # Загрузка файла конфигурации из указанного URL
         wget https://files.elixir.finance/validator.env
+
+        # Запрос данных у пользователя для заполнения переменных в validator.env
         read -p "Введите STRATEGY_EXECUTOR_DISPLAY_NAME: " STRATEGY_EXECUTOR_DISPLAY_NAME
         read -p "Введите STRATEGY_EXECUTOR_BENEFICIARY: " STRATEGY_EXECUTOR_BENEFICIARY
         read -p "Введите SIGNER_PRIVATE_KEY: " SIGNER_PRIVATE_KEY
-        # Замена значений в validator.env
+
+        # Замена значений в validator.env на введенные пользователем
         sed -i "s/^STRATEGY_EXECUTOR_DISPLAY_NAME=.*/STRATEGY_EXECUTOR_DISPLAY_NAME=$STRATEGY_EXECUTOR_DISPLAY_NAME/" validator.env
         sed -i "s/^STRATEGY_EXECUTOR_BENEFICIARY=.*/STRATEGY_EXECUTOR_BENEFICIARY=$STRATEGY_EXECUTOR_BENEFICIARY/" validator.env
         sed -i "s/^SIGNER_PRIVATE_KEY=.*/SIGNER_PRIVATE_KEY=$SIGNER_PRIVATE_KEY/" validator.env
     else
+        # Если файл уже существует, вывод сообщения и пропуск загрузки
         echo "Файл validator.env уже существует. Пропуск загрузки."
     fi
-    # Скачивание образа
+
+    # Скачивание образа Docker для Elixir
+    echo "Скачиваем образ Docker..."
     docker pull elixirprotocol/validator:v3
 
-    echo "Настройка завершена, дальше запустите узел в выбранной сети"
+    # Сообщение о завершении настройки
+    echo "Настройка завершена, дальше запустите узел в выбранной сети."
 }
+
 
 # Функция для обновления узла
 update_node() {
