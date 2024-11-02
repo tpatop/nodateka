@@ -220,7 +220,7 @@ show_menu() {
     echo "1. Установка ноды"
     echo "2. Логи ноды"
     echo "3. Замена RPC"
-    echo "del. Удаление ноды"
+    echo "9. Удаление ноды"
     echo "0. Выход"
 }
 
@@ -248,7 +248,7 @@ handle_choice() {
             echo "Замена RPC URL..."
             replace_rpc_url
             ;;
-        del)
+        9)
             echo "Удаление ноды..."
             delete_node
             ;;
