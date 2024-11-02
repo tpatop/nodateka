@@ -263,10 +263,10 @@ handle_choice() {
     esac
 }
 
-# Основной цикл меню
 while true; do
     show_menu
     read -p "Ваш выбор: " action
-    handle_choice "$choice"
+    handle_choice "$action"  # Используем переменную action
 done
+
 
