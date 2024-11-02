@@ -120,6 +120,7 @@ install_foundry() {
         echo "Установка Foundry..."
         mkdir ~/foundry && cd ~/foundry || exit
         curl -L https://foundry.paradigm.xyz | bash
+        sleep 2
         source ~/.bashrc
         foundryup
     else
@@ -159,6 +160,7 @@ main() {
     configure_files
     restart_docker_containers
     install_foundry
+    source ~/.bashrc
     install_project_dependencies
     deploy_contract
     echo "Скрипт завершен. Проверьте вывод выше для подтверждения успешного развертывания."
