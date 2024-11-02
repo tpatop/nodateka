@@ -114,18 +114,38 @@ restart_docker_containers() {
     fi
 }
 
+# Функция для проверки и выполнения foundryup
+run_foundryup() {
+    # Проверяем, добавлен ли путь до Foundry в .bashrc
+    if grep -q 'foundryup' ~/.bashrc; then
+        echo "Запускаем foundryup..."
+        foundryup
+    else
+        echo "Путь до foundryup не найден в .bashrc."
+        echo "Пожалуйста, выполните 'source ~/.bashrc' вручную или перезапустите терминал."
+    fi
+}
+
 # Функция для установки Foundry
 install_foundry() {
     if confirm "Установить Foundry?"; then
         echo "Установка Foundry..."
         curl -L https://foundry.paradigm.xyz | bash
-        sleep 2
-        source ~/.bashrc
-        foundryup
+        echo "Загрузка завершена. Обновление оболочки..."
+        
+        # Проверяем, что файл .bashrc обновлен
+        if [ -f ~/.bashrc ]; then
+            source ~/.bashrc
+            sleep 1  # Небольшая задержка на случай, если требуется время на обновление
+            run_foundryup  # Запуск foundryup через обертку
+        else
+            echo "Ошибка: не удалось найти .bashrc. Попробуйте вручную запустить 'source ~/.bashrc'."
+        fi
     else
         echo "Пропущена установка Foundry."
     fi
 }
+
 
 # Функция для установки зависимостей проекта
 install_project_dependencies() {
