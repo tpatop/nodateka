@@ -112,6 +112,7 @@ install_foundry() {
 # Функция для установки зависимостей проекта
 install_project_dependencies() {
     echo "Установка зависимостей для hello-world проекта..."
+    source ~/.bashrc
     cd /root/infernet-container-starter/projects/hello-world/contracts || exit
     forge install --no-commit foundry-rs/forge-std || { echo "Ошибка при установке зависимости forge-std. Устраняем..."; rm -rf lib/forge-std && forge install --no-commit foundry-rs/forge-std; }
     forge install --no-commit ritual-net/infernet-sdk || { echo "Ошибка при установке зависимости infernet-sdk. Устраняем..."; rm -rf lib/infernet-sdk && forge install --no-commit ritual-net/infernet-sdk; }
