@@ -95,7 +95,7 @@ run_foundryup() {
     if grep -q 'foundry' ~/.bashrc; then
         source ~/.bashrc
         echo "Запускаем foundryup..."
-        foundryup
+        ./.foundry/bin/foundryup
     else
         echo "Путь до foundryup не найден в .bashrc."
         echo "Пожалуйста, выполните 'source ~/.bashrc' вручную или перезапустите терминал."
