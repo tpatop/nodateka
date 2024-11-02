@@ -71,7 +71,7 @@ configure_files() {
 
     # Изменение порта в docker-compose.yaml
     sed -i 's|4000:|5000:|' "$DOCKER_COMPOSE_PATH"
-    sed -i 's|8545:|5001:|' "$DOCKER_COMPOSE_PATH"
+    sed -i 's|8545:|4999:|' "$DOCKER_COMPOSE_PATH"
 
     cp "$CONFIG_PATH" "$HELLO_CONFIG_PATH"
     sed -i "s|address registry =.*|address registry = 0x3B1554f346DFe5c482Bb4BA31b880c1C18412170;|" "$DEPLOY_SCRIPT_PATH"
