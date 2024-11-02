@@ -3,6 +3,17 @@
 # Вызов скрипта для вывода имени
 bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
 
+# Функция для запроса подтверждения
+confirm() {
+    local prompt="$1"
+    read -p "$prompt (нажмите Enter для продолжения или n для пропуска): " choice
+    if [[ -z "$choice" || "$choice" == "y" ]]; then
+        return 0  # Выполнить действие
+    else
+        return 1  # Пропустить действие
+    fi
+}
+
 # Функция для установки зависимостей
 install_dependencies() {
     if confirm "Установить необходимые зависимости?"; then
@@ -13,17 +24,6 @@ install_dependencies() {
             curl
     else
         echo "Пропущена установка зависимостей."
-    fi
-}
-
-# Функция для запроса подтверждения
-confirm() {
-    local prompt="$1"
-    read -p "$prompt (нажмите Enter для продолжения или n для пропуска): " choice
-    if [[ -z "$choice" || "$choice" == "y" ]]; then
-        return 0  # Выполнить действие
-    else
-        return 1  # Пропустить действие
     fi
 }
 
@@ -63,11 +63,11 @@ start_screen_session() {
 configure_files() {
     if confirm "Настроить файлы конфигурации?"; then
         echo "Настройка файлов конфигурации..."
-        CONFIG_PATH="~/infernet-container-starter/deploy/config.json"
-        HELLO_CONFIG_PATH="~/infernet-container-starter/projects/hello-world/container/config.json"
-        DEPLOY_SCRIPT_PATH="~/infernet-container-starter/projects/hello-world/contracts/script/Deploy.s.sol"
-        MAKEFILE_PATH="~/infernet-container-starter/projects/hello-world/contracts/Makefile"
-        DOCKER_COMPOSE_PATH="~/infernet-container-starter/deploy/docker-compose.yaml"
+        CONFIG_PATH="/root/infernet-container-starter/deploy/config.json"
+        HELLO_CONFIG_PATH="/root/infernet-container-starter/projects/hello-world/container/config.json"
+        DEPLOY_SCRIPT_PATH="/root/infernet-container-starter/projects/hello-world/contracts/script/Deploy.s.sol"
+        MAKEFILE_PATH="/root/infernet-container-starter/projects/hello-world/contracts/Makefile"
+        DOCKER_COMPOSE_PATH="/root/infernet-container-starter/deploy/docker-compose.yaml"
 
         sed -i 's|\"rpc_url\":.*|\"rpc_url\": \"https://mainnet.base.org/\",|' "$CONFIG_PATH"
         sed -i 's|\"registry_address\":.*|\"registry_address\": \"0x3B1554f346DFe5c482Bb4BA31b880c1C18412170\",|' "$CONFIG_PATH"
@@ -117,7 +117,7 @@ install_foundry() {
 install_project_dependencies() {
     if confirm "Установить зависимости для hello-world проекта?"; then
         echo "Установка зависимостей для hello-world проекта..."
-        cd ~/infernet-container-starter/projects/hello-world/contracts || exit
+        cd /root/infernet-container-starter/projects/hello-world/contracts || exit
         forge install --no-commit foundry-rs/forge-std || { echo "Ошибка при установке зависимости forge-std. Устраняем..."; rm -rf lib/forge-std && forge install --no-commit foundry-rs/forge-std; }
         forge install --no-commit ritual-net/infernet-sdk || { echo "Ошибка при установке зависимости infernet-sdk. Устраняем..."; rm -rf lib/infernet-sdk && forge install --no-commit ritual-net/infernet-sdk; }
     else
@@ -129,7 +129,7 @@ install_project_dependencies() {
 deploy_contract() {
     if confirm "Развернуть контракт?"; then
         echo "Развертывание контракта..."
-        cd ~/infernet-container-starter || exit
+        cd /root/infernet-container-starter || exit
         project=hello-world make deploy-contracts
     else
         echo "Пропущено развертывание контракта."
