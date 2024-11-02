@@ -108,12 +108,13 @@ install_project_dependencies() {
 
 # Функция для развертывания контракта
 deploy_contract() {
-    echo "Развертывание контракта..."
-    cd /root/infernet-container-starter || exit
-    project=hello-world make deploy-contracts
+    confirm "Развернуть контракт?" && {
+        echo "Развертывание контракта..."
+        cd /root/infernet-container-starter || exit
+        project=hello-world make deploy-contracts
+    } || echo "Пропущено развертывание контракта."
 }
 
-# Функция для замены адреса контракта
 call_contract() {
     read -p "Введите Contract Address: " CONTRACT_ADDRESS
     echo "Заменяем старый номер в CallsContract.s.sol..."
@@ -121,6 +122,7 @@ call_contract() {
     echo "Выполняем команду project=hello-world make call-contract..."
     project=hello-world make call-contract
 }
+
 
 # Функция для замены RPC URL
 replace_rpc_url() {
