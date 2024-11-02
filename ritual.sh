@@ -151,14 +151,16 @@ install_project_dependencies() {
     fi
 }
 
-# Функция для развертывания контракта
-deploy_contract() {
-    if confirm "Развернуть контракт?"; then
-        echo "Развертывание контракта..."
-        cd /root/infernet-container-starter || exit
-        project=hello-world make deploy-contracts
+# Функция для замены адреса контракта
+replace_contract_address() {
+    if confirm "Вставить Contract Address из предыдущего шага?"; then
+        read -p "Введите Contract Address: " CONTRACT_ADDRESS
+        echo "Заменяем старый номер в CallsContract.s.sol..."
+        sed -i "s|SaysGM(.*)|SaysGM($CONTRACT_ADDRESS)|" ~/infernet-container-starter/projects/hello-world/contracts/script/CallContract.s.sol
+        echo "Выполняем команду project=hello-world make call-contract..."
+        project=hello-world make call-contract
     else
-        echo "Пропущено развертывание контракта."
+        echo "Пропущена вставка Contract Address."
     fi
 }
 
@@ -173,6 +175,7 @@ main() {
     install_foundry
     install_project_dependencies
     deploy_contract
+    replace_contract_address  # Вызов функции для замены адреса контракта
     echo "Скрипт завершен. Проверьте вывод выше для подтверждения успешного развертывания."
 }
 
