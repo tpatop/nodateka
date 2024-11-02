@@ -151,8 +151,18 @@ install_project_dependencies() {
     fi
 }
 
+# Функция для развертывания контракта
+deploy_contract() {
+    if confirm "Развернуть контракт?"; then
+        echo "Развертывание контракта..."
+        cd /root/infernet-container-starter || exit
+        project=hello-world make deploy-contracts
+    else
+        echo "Пропущено развертывание контракта."
+    fi
+}
 # Функция для замены адреса контракта
-replace_contract_address() {
+call_contract() {
     if confirm "Вставить Contract Address из предыдущего шага?"; then
         read -p "Введите Contract Address: " CONTRACT_ADDRESS
         echo "Заменяем старый номер в CallsContract.s.sol..."
@@ -164,20 +174,47 @@ replace_contract_address() {
     fi
 }
 
-# Основной скрипт
-main() {
-    install_dependencies
-    install_docker
-    clone_repository
-    start_screen_session
-    configure_files
-    restart_docker_containers
-    install_foundry
-    install_project_dependencies
-    deploy_contract
-    replace_contract_address  # Вызов функции для замены адреса контракта
-    echo "Скрипт завершен. Проверьте вывод выше для подтверждения успешного развертывания."
+show_menu() {
+    echo "Выберите действие:"
+    echo "1. Установка ноды"
+    echo "2. Логи ноды (docker logs -f --tail 20 infernet-node)"
+    echo "0. Выход"
 }
 
-# Запуск основного скрипта
-main
+# Функция для обработки выбора пользователя
+handle_choice() {
+    case "$1" in
+        1)
+            echo "Запущена установка ноды..."
+            install_dependencies
+            install_docker
+            clone_repository
+            start_screen_session
+            configure_files
+            restart_docker_containers
+            install_foundry
+            install_project_dependencies
+            deploy_contract
+            call_contract
+            ;;
+        2)
+            echo "Отображение логов ноды..."
+            docker logs -f --tail 20 infernet-node
+            ;;
+        0)
+            echo "Выход..."
+            exit 0
+            ;;
+        *)
+            echo "Неверный выбор, попробуйте снова."
+            ;;
+    esac
+}
+
+# Основной цикл меню
+while true; do
+    show_menu
+    read -p "Введите номер действия: " choice
+    handle_choice "$choice"
+done
+
