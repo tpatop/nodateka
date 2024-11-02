@@ -83,6 +83,9 @@ configure_files() {
         sed -i 's|RPC_URL :=.*|RPC_URL := https://mainnet.base.org|' "$MAKEFILE_PATH"
 
         sed -i 's|ritualnetwork/infernet-node:1.3.1|ritualnetwork/infernet-node:1.4.0|' "$DOCKER_COMPOSE_PATH"
+        
+        # Изменение порта 4000 на 5000
+        sed -i 's|4000|5000|g' "$DOCKER_COMPOSE_PATH"
     else
         echo "Пропущена настройка файлов конфигурации."
     fi
