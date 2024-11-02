@@ -3,6 +3,19 @@
 # Вызов скрипта для вывода имени
 bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
 
+# Функция для установки зависимостей
+install_dependencies() {
+    if confirm "Установить необходимые зависимости?"; then
+        echo "Обновление пакетов и установка зависимостей..."
+        sudo apt-get update -y && sudo apt upgrade -y
+        sudo apt-get install -y \
+            make build-essential unzip lz4 gcc git jq ncdu tmux cmake clang pkg-config libssl-dev python3-pip protobuf-compiler bc \
+            curl
+    else
+        echo "Пропущена установка зависимостей."
+    fi
+}
+
 # Функция для запроса подтверждения
 confirm() {
     local prompt="$1"
@@ -125,6 +138,7 @@ deploy_contract() {
 
 # Основной скрипт
 main() {
+    install_dependencies
     install_docker
     clone_repository
     start_screen_session
