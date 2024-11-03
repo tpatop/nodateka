@@ -69,8 +69,6 @@ configure_files() {
         # Изменение порта в docker-compose.yaml
     sed -i 's|4000:|5000:|' "$DOCKER_COMPOSE_PATH"
     sed -i 's|8545:|4999:|' "$DOCKER_COMPOSE_PATH"
-
-
 }
 
 restart_docker_containers() {
@@ -96,6 +94,29 @@ install_project_dependencies() {
     cd /root/infernet-container-starter/projects/hello-world/contracts || exit
     "$FORGE_PATH" install --no-commit foundry-rs/forge-std || rm -rf lib/forge-std && "$FORGE_PATH" install --no-commit foundry-rs/forge-std
     "$FORGE_PATH" install --no-commit ritual-net/infernet-sdk || rm -rf lib/infernet-sdk && "$FORGE_PATH" install --no-commit ritual-net/infernet-sdk
+}
+
+# Функция для развертывания контракта
+deploy_contract() {
+    if confirm "Развернуть контракт?"; then
+        echo "Развертывание контракта..."
+        cd /root/infernet-container-starter || exit
+        project=hello-world make deploy-contracts
+    else
+        echo "Пропущено развертывание контракта."
+    fi
+}
+# Запрос
+call_contract() {
+    if confirm "Вызвать новый запрос?"; then
+        read -p "Введите Contract Address: " CONTRACT_ADDRESS
+        echo "Заменяем старый номер в CallsContract.s.sol..."
+        sed -i "s|SaysGM(.*)|SaysGM($CONTRACT_ADDRESS)|" ~/infernet-container-starter/projects/hello-world/contracts/script/CallContract.s.sol
+        echo "Выполняем команду project=hello-world make call-contract..."
+        project=hello-world make call-contract
+    else
+        echo "Пропущен вызов запроса."
+    fi
 }
 
 replace_rpc_url() {
@@ -130,6 +151,7 @@ show_menu() {
 handle_choice() {
     case "$1" in
         1)
+            echo "Запущена установка ноды..."
             install_dependencies
             install_docker
             clone_repository
@@ -138,6 +160,8 @@ handle_choice() {
             restart_docker_containers
             install_foundry
             install_project_dependencies
+            deploy_contract
+            call_contract
             ;;
         2) docker logs -f --tail 20 infernet-node ;;
         3) replace_rpc_url ;;
