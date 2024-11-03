@@ -34,13 +34,14 @@ clone_repository() {
     echo "Клонирование репозитория infernet-container-starter..."
     git clone https://github.com/ritual-net/infernet-container-starter || { echo "Ошибка клонирования"; exit 1; }
     cd infernet-container-starter || exit
-    # Изменение порта в docker-compose.yaml
-    sed -i 's|4000:|5000:|' "$DOCKER_COMPOSE_PATH"
-    sed -i 's|8545:|4999:|' "$DOCKER_COMPOSE_PATH"
 }
 
 # Запуск screen сессии
 start_screen_session() {
+    # Изменение порта в docker-compose.yaml
+    sed -i 's|4000:|5000:|' "$DOCKER_COMPOSE_PATH"
+    sed -i 's|8545:|4999:|' "$DOCKER_COMPOSE_PATH"
+    sed -i "s|ritualnetwork/infernet-node:1.3.1|ritualnetwork/infernet-node:1.4.0|" "$DOCKER_COMPOSE_PATH"
     echo "Запуск screen сессии 'ritual'..."
     screen -S ritual -d -m bash -c "project=hello-world make deploy-container"
     echo "Открыто новое окно screen."
@@ -57,7 +58,10 @@ configure_files() {
     BATCH_SIZE=${BATCH_SIZE:-1800}
     read -p "Введите значение starting_sub_id (по умолчанию 170000): " STARTING_SUB_ID
     STARTING_SUB_ID=${STARTING_SUB_ID:-170000}
+    read -p "Введите адрес RPC (по умолчанию https://mainnet.base.org): " RPC_URL
+    RPC_URL=${RPC_URL:-https://mainnet.base.org}  # Устанавливаем значение по умолчанию
 
+    sed -i "s|\"rpc_url\":.*|\"rpc_url\": \"$RPC_URL\",|" "$CONFIG_PATH"
     sed -i "s|\"registry_address\":.*|\"registry_address\": \"0x3B1554f346DFe5c482Bb4BA31b880c1C18412170\",|" "$CONFIG_PATH"
     sed -i "s|\"private_key\":.*|\"private_key\": \"$PRIVATE_KEY\",|" "$CONFIG_PATH"
     sed -i "s|\"sleep\":.*|\"sleep\": $SLEEP,|" "$CONFIG_PATH"
@@ -67,9 +71,6 @@ configure_files() {
 
     sed -i "s|address registry =.*|address registry = 0x3B1554f346DFe5c482Bb4BA31b880c1C18412170;|" "$DEPLOY_SCRIPT_PATH"
     sed -i "s|sender :=.*|sender := $PRIVATE_KEY|" "$MAKEFILE_PATH"
-    sed -i "s|ritualnetwork/infernet-node:1.3.1|ritualnetwork/infernet-node:1.4.0|" "$DOCKER_COMPOSE_PATH"
-
-    replace_rpc_url
 }
 
 restart_docker_containers() {
