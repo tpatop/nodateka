@@ -34,6 +34,9 @@ clone_repository() {
     echo "Клонирование репозитория infernet-container-starter..."
     git clone https://github.com/ritual-net/infernet-container-starter || { echo "Ошибка клонирования"; exit 1; }
     cd infernet-container-starter || exit
+    # Изменение порта в docker-compose.yaml
+    sed -i 's|4000:|5000:|' "$DOCKER_COMPOSE_PATH"
+    sed -i 's|8545:|4999:|' "$DOCKER_COMPOSE_PATH"
 }
 
 # Запуск screen сессии
@@ -66,9 +69,6 @@ configure_files() {
     sed -i "s|sender :=.*|sender := $PRIVATE_KEY|" "$MAKEFILE_PATH"
     sed -i "s|ritualnetwork/infernet-node:1.3.1|ritualnetwork/infernet-node:1.4.0|" "$DOCKER_COMPOSE_PATH"
 
-        # Изменение порта в docker-compose.yaml
-    sed -i 's|4000:|5000:|' "$DOCKER_COMPOSE_PATH"
-    sed -i 's|8545:|4999:|' "$DOCKER_COMPOSE_PATH"
     replace_rpc_url
 }
 
