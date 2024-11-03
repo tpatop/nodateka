@@ -59,7 +59,7 @@ configure_files() {
     sed -i "s|\"private_key\":.*|\"private_key\": \"$PRIVATE_KEY\",|" "$CONFIG_PATH"
     sed -i "s|\"sleep\":.*|\"sleep\": $SLEEP,|" "$CONFIG_PATH"
     sed -i "s|\"batch_size\":.*|\"batch_size\": $BATCH_SIZE,|" "$CONFIG_PATH"
-    sed -i "/\"batch_size\":/a \ \ \"starting_sub_id\": $STARTING_SUB_ID," "$CONFIG_PATH"
+    sed -i "/\"batch_size\":/a \ \ \"starting_sub_id\": $STARTING_SUB_ID" "$CONFIG_PATH"
     cp "$CONFIG_PATH" "$HELLO_CONFIG_PATH"
 
     sed -i "s|address registry =.*|address registry = 0x3B1554f346DFe5c482Bb4BA31b880c1C18412170;|" "$DEPLOY_SCRIPT_PATH"
@@ -69,6 +69,7 @@ configure_files() {
         # Изменение порта в docker-compose.yaml
     sed -i 's|4000:|5000:|' "$DOCKER_COMPOSE_PATH"
     sed -i 's|8545:|4999:|' "$DOCKER_COMPOSE_PATH"
+    replace_rpc_url
 }
 
 restart_docker_containers() {
