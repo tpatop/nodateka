@@ -97,7 +97,7 @@ configure_files() {
         # Изменения в файле конфигурации
         sed -i 's|4000,|5000,|' "$HELLO_CONFIG_PATH"
         sed -i 's|"3000"|"4998"|' "$HELLO_CONFIG_PATH"
-        sed -i 's|:3000|:4998|' "$HELLO_CONFIG_PATH"
+        #sed -i 's|:3000|:4998|' "$HELLO_CONFIG_PATH"
         sed -i "s|\"rpc_url\":.*|\"rpc_url\": \"$RPC_URL\",|" "$HELLO_CONFIG_PATH"
         sed -i "s|\"registry_address\":.*|\"registry_address\": \"0x3B1554f346DFe5c482Bb4BA31b880c1C18412170\",|" "$HELLO_CONFIG_PATH"
         sed -i "s|\"private_key\":.*|\"private_key\": \"$PRIVATE_KEY\",|" "$HELLO_CONFIG_PATH"
