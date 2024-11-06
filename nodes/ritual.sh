@@ -224,7 +224,7 @@ replace_rpc_url() {
 
         for config_path in "${CONFIG_PATHS[@]}"; do
             if [[ -f "$config_path" ]]; then
-                sed -i "s|https://mainnet.base.org|$NEW_RPC_URL|g" "$config_path"
+                sed -i "s|\"rpc_url\": \".*\"|\"rpc_url\": \"$NEW_RPC_URL\"|g" "$config_path"
                 echo "RPC URL заменен в $config_path"
                 files_found=true  # Устанавливаем флаг, если файл найден
             else
