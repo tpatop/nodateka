@@ -311,6 +311,9 @@ handle_choice() {
             echo "Замена RPC URL..."
             replace_rpc_url
             ;;
+        8)
+            show_project_info
+            ;;
         9)
             echo "Удаление ноды..."
             delete_node
