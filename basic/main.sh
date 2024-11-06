@@ -41,6 +41,6 @@ while true; do
         2) install_fail2ban ;;
         3) clear_memory ;;
         0) echo "Выход."; exit 0 ;;
-        *) *) echo "Неверный выбор. Попробуйте снова." ;;
+        *) echo "Неверный выбор. Попробуйте снова." ;;
     esac
 done
