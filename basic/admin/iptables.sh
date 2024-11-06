@@ -3,20 +3,17 @@
 echo "Очистка всех существующих правил OUTPUT"
 iptables -F OUTPUT
 
-echo "Разрешение трафика к 127.0.0.1"
-iptables -A OUTPUT -d 127.0.0.1/8 -j ACCEPT
+# echo "Разрешение трафика к 127.0.0.1"
+# iptables -A OUTPUT -d 127.0.0.1/8 -j ACCEPT
 
-# Разрешение всего трафика для интерфейса lo
-iptables -A OUTPUT -o lo -j ACCEPT
-
-# Разрешить исходящий трафик в диапазоны Docker от 172.17.0.0/16 до 172.40.0.0/16
+echo "Разрешение исходящего трафика в диапазоне Docker от 172.17.0.0/16 до 172.40.0.0/16"
 for i in $(seq 17 40); do
     iptables -A OUTPUT -d 172.$i.0.0/16 -j ACCEPT
     iptables -A INPUT -s 172.$i.0.0/16 -j ACCEPT
 done
+sleep 2
 
 echo "Добавление блокирующих правил"
-#iptables -A OUTPUT -d 0.0.0.0/8 -j DROP
 iptables -A OUTPUT -d 10.0.0.0/8 -j DROP
 iptables -A OUTPUT -d 100.64.0.0/10 -j DROP
 iptables -A OUTPUT -d 169.254.0.0/16 -j DROP

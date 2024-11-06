@@ -2,14 +2,27 @@
 
 # Скрипт для отображения основной страницы по настройке сервера
 
-# Функция для отображения меню
-show_menu() {
-    echo "Выберите действие:"
-    echo "1. Настройка iptables"
-    echo "2. Установка Fail2ban"
-    echo "3. Очистка памяти"
-    echo "0. Выход"
+# Логотип команды
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+
+# Функция для подтверждения выбора пользователя
+confirm() {
+    local prompt="$1"
+    read -p "$prompt [y/n, Enter = yes]: " choice
+    case "$choice" in
+        ""|y|Y|yes|Yes)  # Пустой ввод или "да"
+            return 0  # Подтверждение действия
+            ;;
+        n|N|no|No)  # Любой вариант "нет"
+            return 1  # Отказ от действия
+            ;;
+        *)
+            echo "Пожалуйста, введите y или n."
+            confirm "$prompt"  # Повторный запрос, если ответ не распознан
+            ;;
+    esac
 }
+
 
 # Функция для настройки iptables
 setup_iptables() {
@@ -21,26 +34,44 @@ setup_iptables() {
 # Функция для установки Fail2ban
 install_fail2ban() {
     echo "Загружается и выполняется скрипт для установки Fail2ban..."
-    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/iptables.sh)
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/fail2ban.sh)
     echo "Установка Fail2ban завершена."
 }
 
 # Функция для очистки памяти
 clear_memory() {
-    echo "Очистка памяти..."
-    # Здесь можно добавить конкретные команды для очистки памяти
+    echo "Загружается и выполняется скрипт для очистки памяти..."
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/clear.sh)
     echo "Очистка памяти завершена."
 }
 
-# Основной цикл меню
+# Функция для отображения меню
+show_menu() {
+    echo "Выберите действие:"
+    echo "1. Настройка iptables"
+    echo "2. Установка Fail2ban"
+    echo "3. Очистка памяти"
+    echo "0. Выход"
+}
+
+# Функция для обработки выбора пользователя
+handle_choice() {
+    case "$1" in
+        1)
+            setup_iptables ;;
+        2)
+            install_fail2ban ;;
+        3)
+            clear_memory ;;        
+        0) 
+            echo "Выход."; exit 0 ;;
+        *) 
+            echo "Неверный выбор. Попробуйте снова." ;;
+    esac
+}
+
 while true; do
     show_menu
-    read -p "Введите номер действия: " choice
-    case $choice in
-        1) setup_iptables ;;
-        2) install_fail2ban ;;
-        3) clear_memory ;;
-        0) echo "Выход."; exit 0 ;;
-        *) echo "Неверный выбор. Попробуйте снова." ;;
-    esac
+    read -p "Ваш выбор: " action
+    handle_choice "$action"  # Используем переменную action
 done
