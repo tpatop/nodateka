@@ -53,6 +53,14 @@ clear_memory() {
     echo "Очистка памяти завершена."
 }
 
+show_node_list() {
+    echo "elixir: \t bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/nodes/elixir.sh)"
+    echo "unichain: \t bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/nodes/unichain.sh)"
+    echo "ritual: \t bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/nodes/ritual.sh)"
+    echo "ora (перезапуск): \t bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/nodes/ora-restart.sh)"
+}
+
+
 # Функция для отображения меню
 show_menu() {
     echo "Выберите действие:"
@@ -60,24 +68,20 @@ show_menu() {
     echo "2. Установка Fail2ban"
     echo "3. Установка автоудаления логов"
     echo "4. Экспресс очистка памяти"
+    echo "9. Список скриптов установки/настройки нод"
     echo "0. Выход"
 }
 
 # Функция для обработки выбора пользователя
 handle_choice() {
     case "$1" in
-        1)
-            setup_iptables ;;
-        2)
-            install_fail2ban ;;
-        3)
-            autoclear_memory ;;   
-        4)
-            clear_memory ;;        
-        0) 
-            echo "Выход."; exit 0 ;;
-        *) 
-            echo "Неверный выбор. Попробуйте снова." ;;
+        1) setup_iptables ;;
+        2) install_fail2ban ;;
+        3) autoclear_memory ;;   
+        4) clear_memory ;; 
+        9) show_node_list ;;               
+        0) echo "Выход."; exit 0 ;;
+        *) echo "Неверный выбор. Попробуйте снова." ;;
     esac
 }
 
