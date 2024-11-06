@@ -255,6 +255,28 @@ delete_node() {
     fi
 }
 
+# Функция для отображения информации о проекте
+show_project_info() {
+    echo "Информация о проекте:"
+    echo ""
+    echo "Рекомендуемые системные характеристики:"
+    echo "- CPU: 4 ядра"
+    echo "- RAM: 16 GB"
+    echo "- Хранилище: 500 GB SSD"
+    echo "- Новый EVM кошелек с токенами ETH на основной сети Base (15-20$ на счету)"
+    echo ""
+    echo "Требуемые порты:"
+    required_ports=("3000" "5000" "2020" "24224" "6379" "4999")
+    
+    for port in "${required_ports[@]}"; do
+        if ss -tuln | grep -q ":$port "; then
+            echo "Порт $port: ЗАНЯТ"
+        else
+            echo "Порт $port: СВОБОДЕН"
+        fi
+    done
+}
+
 # Функция для отображения меню
 show_menu() {
     echo ""
@@ -262,6 +284,7 @@ show_menu() {
     echo "1. Установка ноды"
     echo "2. Логи ноды"
     echo "3. Замена RPC"
+    echo "8. Информация о проекте"
     echo "9. Удаление ноды"
     echo "0. Выход"
 }
