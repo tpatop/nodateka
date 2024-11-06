@@ -14,14 +14,14 @@ show_menu() {
 # Функция для настройки iptables
 setup_iptables() {
     echo "Загружается и выполняется скрипт для настройки iptables..."
-    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/iptables.sh)
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/iptables.sh)
     echo "Настройка iptables завершена."
 }
 
 # Функция для установки Fail2ban
 install_fail2ban() {
     echo "Загружается и выполняется скрипт для установки Fail2ban..."
-    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/fail2ban.sh)
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/iptables.sh)
     echo "Установка Fail2ban завершена."
 }
 

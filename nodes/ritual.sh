@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Вызов скрипта для вывода имени
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
 
 # Переменные для путей
 CONFIG_PATH="/root/infernet-container-starter/deploy/config.json"
@@ -32,7 +32,7 @@ install_dependencies() {
         sudo apt-get install -y make build-essential unzip lz4 gcc git jq ncdu tmux \
         cmake clang pkg-config libssl-dev python3-pip protobuf-compiler bc curl
         echo "Установка Docker и Docker Compose..."
-        bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/docker.sh)
+        bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
         echo "Скачивание необходимого образа"
         docker pull ritualnetwork/hello-world-infernet:latest
     else

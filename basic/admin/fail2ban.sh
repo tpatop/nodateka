@@ -2,12 +2,12 @@
 # Скрипт управления Fail2ban для защиты SSH
 
 # Логотип команды
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
 
 # Функция установки Fail2ban
 install_fail2ban() {
     # Установка и настройка логирования, если отсутствует
-    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/auth_log.sh)
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/auth_log.sh)
     
     echo "🔍 Проверка наличия Fail2ban..."
     if dpkg -l | grep -q fail2ban; then

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Вызов скрипта для вывода имени
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
 
 # Функция для отображения меню
 show_menu() {
@@ -22,7 +22,7 @@ install_node() {
     echo "Устанавливаем узел..."
 
     # Вызов скрипта для проверки и установки Docker и Docker Compose
-    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/docker.sh)
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
 
     # Создание каталога ~/elixir, если он не существует, и переход в него
     mkdir -p ~/elixir && cd ~/elixir

@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Вызов скрипта для вывода имени
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
 
 # Вызов скрипта для проверки и установки Docker и Docker Compose
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/docker.sh)
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
 
 # Клонирование репозитория Uniswap unichain-node
 echo "Клонирование репозитория Uniswap unichain-node..."

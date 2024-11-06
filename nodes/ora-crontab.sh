@@ -1,12 +1,12 @@
 #!/bin/bash
 
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/main/name.sh)
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
 
 # Функция для скачивания скрипта ora-restart.sh, если его еще нет
 download_script() {
     if [ ! -f ~/tora/ora-restart.sh ]; then
         mkdir -p ~/tora
-        wget -O ~/tora/ora-restart.sh https://raw.githubusercontent.com/tpatop/nodateka/main/ora-restart.sh
+        wget -O ~/tora/ora-restart.sh https://github.com/tpatop/nodateka/blob/main/nodes/ora-restart.sh
         chmod +x ~/tora/ora-restart.sh
         echo "Скрипт ora-restart.sh успешно скачан и установлен как исполняемый."
     else
