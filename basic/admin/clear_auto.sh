@@ -67,8 +67,7 @@ EOL
 
     echo "logrotate настроен на ежедневную очистку логов, хранения логов до 100 MB."
     echo "Запуск проверки logrotate..."
-    sudo logrotate -f "$LOGROTATE_CONF"
-
+    sudo logrotate -f /etc/logrotate.conf
     echo "Настройка завершена."
 }
 
