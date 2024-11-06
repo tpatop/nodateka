@@ -53,18 +53,23 @@ delete_archives() {
     fi
 }
 
-# # 4. Сортировка файлов по размеру в текущей директории
-# list_sorted_files() {
-#     if confirm "Отсортировать файлы по размеру в текущей директории?"; then
-#         echo "Список файлов по размеру:"
-#         find . -type f -exec du -h {} + | sort -hr | head -n 10
-#     else
-#         echo "Сортировка файлов отменена."
-#     fi
-# }
+# 4. Удаление кеша, временных файлов и пр.
+delete_cache() {
+    if confirm "Будет произведена очистка кеша, приступить?"; then
+        echo "очистка кеша"
+        sudo apt clean
+        sudo apt autoremove --purge
+        sudo apt autoremove
+        sudo sync; sudo sysctl -w vm.drop_caches=3
+        rm -rf ~/.cache/thumbnails/*
+        echo "Кеш успешно очищен."
+    else 
+        echo "Отменено"
+    fi
+}
 
 # Вызов всех функций с подтверждением пользователя
 clear_logs
 clear_docker
 delete_archives
-# list_sorted_files
+delete_cache

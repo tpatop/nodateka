@@ -25,7 +25,6 @@ confirm() {
     esac
 }
 
-
 # Функция для настройки iptables
 setup_iptables() {
     echo "Загружается и выполняется скрипт для настройки iptables..."
@@ -41,6 +40,13 @@ install_fail2ban() {
 }
 
 # Функция для очистки памяти
+autoclear_memory() {
+    echo "Загружается и выполняется скрипт для настройки автоматического очищения..."
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/clear_auto.sh)
+    echo "Успешно."
+}
+
+# Функция для очистки памяти
 clear_memory() {
     echo "Загружается и выполняется скрипт для очистки памяти..."
     bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/clear.sh)
@@ -52,7 +58,8 @@ show_menu() {
     echo "Выберите действие:"
     echo "1. Настройка iptables"
     echo "2. Установка Fail2ban"
-    echo "3. Очистка памяти"
+    echo "3. Установка автоудаления логов"
+    echo "4. Экспресс очистка памяти"
     echo "0. Выход"
 }
 
@@ -64,6 +71,8 @@ handle_choice() {
         2)
             install_fail2ban ;;
         3)
+            autoclear_memory ;;   
+        4)
             clear_memory ;;        
         0) 
             echo "Выход."; exit 0 ;;
