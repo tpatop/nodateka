@@ -3,7 +3,9 @@
 # Скрипт для отображения основной страницы по настройке сервера
 
 # Логотип команды
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+show_logotip(){
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+}
 
 # Функция для подтверждения выбора пользователя
 confirm() {
@@ -71,6 +73,7 @@ handle_choice() {
 }
 
 while true; do
+    show_logotip
     show_menu
     read -p "Ваш выбор: " action
     handle_choice "$action"  # Используем переменную action

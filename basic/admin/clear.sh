@@ -20,7 +20,7 @@ confirm() {
 
 # 1. Очистка журналов логирования старше заданного периода
 clear_logs() {
-    if confirm "Очистить журналы логирования старше 1 секунды?"; then
+    if confirm "Очистить журналы логирования?"; then
         echo "Очистка старых журналов..."
         sudo journalctl --vacuum-time=1s
         sudo find /var/log -type f \( -name "*.gz" -o -name "*.xz" -o -name "*.tar" -o -name "*.zip" \) -delete
@@ -53,18 +53,18 @@ delete_archives() {
     fi
 }
 
-# 4. Сортировка файлов по размеру в текущей директории
-list_sorted_files() {
-    if confirm "Отсортировать файлы по размеру в текущей директории?"; then
-        echo "Список файлов по размеру:"
-        find . -type f -exec du -h {} + | sort -hr | head -n 10
-    else
-        echo "Сортировка файлов отменена."
-    fi
-}
+# # 4. Сортировка файлов по размеру в текущей директории
+# list_sorted_files() {
+#     if confirm "Отсортировать файлы по размеру в текущей директории?"; then
+#         echo "Список файлов по размеру:"
+#         find . -type f -exec du -h {} + | sort -hr | head -n 10
+#     else
+#         echo "Сортировка файлов отменена."
+#     fi
+# }
 
 # Вызов всех функций с подтверждением пользователя
 clear_logs
 clear_docker
 delete_archives
-list_sorted_files
+# list_sorted_files
