@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# Вызов скрипта для вывода имени
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+# Логотип команды
+show_logotip(){
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+}
 
 # Функция для отображения меню
 show_menu() {
@@ -129,41 +131,16 @@ start_testnet() {
 
 # Основной цикл для работы меню
 while true; do
+    show_logotip
     show_menu
-
     case "$action" in
-        1)
-            install_node
-            ;;
-        
-        2)
-            start_mainnet
-            ;;
-        
-        3)
-            start_testnet
-            ;;
-        
-        4)
-            update_node
-            ;;
-        
-        5)
-            monitor_mainnet_node
-            ;;
-        
-        6)
-            monitor_testnet_node
-            ;;
-        
-        0)
-            echo "Завершение работы."
-            exit 0
-            ;;
-        
-        *)
-            echo "Неверный выбор. Пожалуйста, попробуйте снова."
-            ;;
-
+        1) install_node ;;
+        2) start_mainnet ;;
+        3) start_testnet ;;
+        4) update_node ;;
+        5) monitor_mainnet_node ;;
+        6) monitor_testnet_node ;;
+        0) echo "Завершение работы."; exit 0 ;;
+        *) echo "Неверный выбор. Пожалуйста, попробуйте снова." ;;
     esac
 done

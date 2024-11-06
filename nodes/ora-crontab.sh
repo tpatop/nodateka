@@ -1,6 +1,9 @@
 #!/bin/bash
 
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+# Логотип команды
+show_logotip(){
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+}
 
 # Функция для скачивания скрипта ora-restart.sh, если его еще нет
 download_script() {
@@ -84,9 +87,7 @@ case "$action" in
         delete_files
         ;;
     0)
-        echo "Выход из программы."
-        ;;
+        echo "Выход из программы." ;;
     *)
-        echo "Неверный выбор. Завершение работы."
-        ;;
+        echo "Неверный выбор. Завершение работы." ;;
 esac

@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# Вызов скрипта для вывода имени
-bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+# Логотип команды
+show_logotip() {
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+}
 
 # Переменные для путей
 CONFIG_PATH="/root/infernet-container-starter/deploy/config.json"
@@ -211,7 +213,8 @@ call_contract() {
 # Функция для замены RPC URL
 replace_rpc_url() {
     if confirm "Заменить RPC URL?"; then
-        read -p "Введите новый RPC URL: " NEW_RPC_URL
+        read -p "Введите новый RPC URL [https://mainnet.base.org]: " NEW_RPC_URL
+        NEW_RPC_URL=${NEW_RPC_URL:-https://mainnet.base.org}
 
         CONFIG_PATHS=(
             "/root/infernet-container-starter/projects/hello-world/container/config.json"
@@ -334,6 +337,7 @@ handle_choice() {
 }
 
 while true; do
+    show_logotip
     show_menu
     read -p "Ваш выбор: " action
     handle_choice "$action"  # Используем переменную action
