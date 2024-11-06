@@ -25,6 +25,9 @@ clear_logs() {
         sudo journalctl --vacuum-time=1s
         sudo find /var/log -type f \( -name "*.gz" -o -name "*.xz" -o -name "*.tar" -o -name "*.zip" \) -delete
         sudo find /run/log -type f \( -name "*.gz" -o -name "*.xz" -o -name "*.tar" -o -name "*.zip" \) -delete
+        sudo rm /var/log/syslog*
+        sudo rm /var/log/kern.log*
+        sudo systemctl restart rsyslog
         echo "Журналы успешно очищены."
     else
         echo "Очистка журналов отменена."

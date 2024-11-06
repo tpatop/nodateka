@@ -71,11 +71,63 @@ EOL
     echo "Настройка завершена."
 }
 
-echo "logrotate — это инструмент, который помогает управлять лог-файлами, ограничивая их размер и предотвращая переполнение диска.
-Он автоматически создает архивы старых логов, сжимает их и удаляет самые старые файлы после заданного количества ротаций."
+# Для очистки логов, хранящихся в бинарных файла (journal)
+configure_journald() {
+    echo "Настройка systemd-journald для ограничения размера и времени хранения журналов..."
 
-if confirm "Установить и настроить logrotate?"; then
+    # Редактирование конфигурации systemd-journald
+    sudo tee -a /etc/systemd/journald.conf > /dev/null <<EOL
+[Journal]
+SystemMaxUse=100M
+MaxRetentionSec=3d
+EOL
+
+    # Перезапуск systemd-journald для применения настроек
+    sudo systemctl restart systemd-journald
+    echo "Настройка systemd-journald завершена."
+}
+
+install_rsyslog() {
+    # Проверка и установка rsyslog
+    if ! command -v rsyslogd &> /dev/null; then
+        echo "Установка rsyslog..."
+        sudo apt update && sudo apt install -y rsyslog
+    else
+        echo "rsyslog уже установлен."
+    fi
+
+    # Редактирование конфигурации rsyslog
+    RSYSLOG_CONF="/etc/rsyslog.conf"
+    echo "Настройка rsyslog для ограничения размера и хранения логов..."
+
+    # Добавляем ограничения в конфигурацию rsyslog
+    sudo tee -a "$RSYSLOG_CONF" > /dev/null <<EOL
+# Ограничение по времени для хранения логов
+$MaxMessageSize 1M    # Максимальный размер для каждого сообщения
+$MaxFileSize 100M     # Максимальный размер файлов логов
+# Удаление логов старше 3 дней
+$FileRetentionTime 3d # Удаление логов старше 3 дней
+EOL
+
+    # Перезагрузка rsyslog для применения изменений
+    sudo systemctl restart rsyslog
+    echo "Настройка rsyslog завершена."
+}
+
+
+echo "logrotate и rsyslog — это инструменты, которые помогают управлять лог-файлами, ограничивая их размер и предотвращая переполнение диска."
+echo "logrotate управляет ротацией и удалением старых логов, а rsyslog ограничивает размер логов и задает параметры их хранения."
+echo "systemd-journald управляет бинарными журналами, и мы будем настраивать его для ограничения размера и времени хранения."
+
+if confirm "Установить и настроить logrotate и rsyslog?"; then
     install_logrotate
+    install_rsyslog
+else
+    echo "Отменено"
+fi
+
+if confirm "Настроить systemd-journald для ограничения размера журналов и времени хранения?"; then
+    configure_journald
 else
     echo "Отменено"
 fi
