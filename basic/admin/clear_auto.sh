@@ -76,7 +76,7 @@ configure_journald() {
     echo "Настройка systemd-journald для ограничения размера и времени хранения журналов..."
 
     # Редактирование конфигурации systemd-journald
-    sudo tee -a /etc/systemd/journald.conf > /dev/null <<EOL
+    sudo tee /etc/systemd/journald.conf > /dev/null <<EOL
 [Journal]
 SystemMaxUse=100M
 MaxRetentionSec=3d
