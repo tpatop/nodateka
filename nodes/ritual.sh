@@ -96,8 +96,13 @@ configure_files() {
 
         # Изменения в файле конфигурации
         sed -i 's|4000,|5000,|' "$HELLO_CONFIG_PATH"
-        # sed -i 's|"3000"|"4998"|' "$HELLO_CONFIG_PATH"
-        # sed -i 's|:3000|:4998|' "$HELLO_CONFIG_PATH"
+        if confirm "Порт 3000 свободен?"; then
+            echo "Отлично, продолжаю установку"
+        else
+            echo "Занятый порт 3000 будет изменен на 4998. Учтите это при проверках."
+            sed -i 's|"3000"|"4998"|' "$HELLO_CONFIG_PATH"
+            # sed -i 's|:3000|:4998|' "$HELLO_CONFIG_PATH"
+        fi
         sed -i "s|\"rpc_url\":.*|\"rpc_url\": \"$RPC_URL\",|" "$HELLO_CONFIG_PATH"
         sed -i "s|\"registry_address\":.*|\"registry_address\": \"0x3B1554f346DFe5c482Bb4BA31b880c1C18412170\",|" "$HELLO_CONFIG_PATH"
         sed -i "s|\"private_key\":.*|\"private_key\": \"$PRIVATE_KEY\",|" "$HELLO_CONFIG_PATH"
@@ -265,8 +270,8 @@ show_project_info() {
     echo "- Хранилище: 500 GB SSD"
     echo "- Новый EVM кошелек с токенами ETH на основной сети Base (15-20$ на счету)"
     echo ""
-    echo "Требуемые порты:"
-    required_ports=("3000" "5000" "2020" "24224" "6379" "4999")
+    echo "Требуемые порты (4998 - резерв для 3000):"
+    required_ports=("3000" "5000" "2020" "24224" "6379" "4999", "4998")
     
     for port in "${required_ports[@]}"; do
         if ss -tuln | grep -q ":$port "; then
