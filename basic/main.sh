@@ -54,10 +54,14 @@ clear_memory() {
 }
 
 show_node_list() {
-    echo "elixir: \t bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/nodes/elixir.sh)"
-    echo "unichain: \t bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/nodes/unichain.sh)"
-    echo "ritual: \t bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/nodes/ritual.sh)"
-    echo "ora (перезапуск): \t bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/nodes/ora-restart.sh)"
+    echo ""
+    BASE_URL="https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/nodes"
+    # Выводим информацию о каждом узле
+    echo -e "elixir:   \t bash <(curl -s ${BASE_URL}/elixir.sh)"
+    echo -e "unichain: \t bash <(curl -s ${BASE_URL}/unichain.sh)"
+    echo -e "ritual:   \t bash <(curl -s ${BASE_URL}/ritual.sh)"
+    echo -e "ora (перезапуск): \t bash <(curl -s ${BASE_URL}/ora-restart.sh)"
+    echo ""
 }
 
 
