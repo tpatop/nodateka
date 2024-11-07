@@ -45,8 +45,8 @@ install_logrotate() {
 # Это глобальная конфигурация для logrotate
 # Ротация логов ежедневно
 daily
-# Хранить последние 7 файлов логов
-rotate 7
+# Хранить последние 1 файлов логов
+rotate 1
 # Сжимать старые файлы
 compress
 # Пропускать, если файл не существует
@@ -79,7 +79,7 @@ configure_journald() {
     sudo tee /etc/systemd/journald.conf > /dev/null <<EOL
 [Journal]
 SystemMaxUse=100M
-MaxRetentionSec=3d
+MaxRetentionSec=2d
 EOL
 
     # Перезапуск systemd-journald для применения настроек
@@ -92,42 +92,38 @@ install_rsyslog() {
     if ! command -v rsyslogd &> /dev/null; then
         echo "Установка rsyslog..."
         sudo apt update && sudo apt install -y rsyslog
+        echo "Установка rsyslog завершена."
     else
         echo "rsyslog уже установлен."
     fi
-
-    # Редактирование конфигурации rsyslog
-    RSYSLOG_CONF="/etc/rsyslog.conf"
-    echo "Настройка rsyslog для ограничения размера и хранения логов..."
-
-    # Добавляем ограничения в конфигурацию rsyslog
-    sudo tee -a "$RSYSLOG_CONF" > /dev/null <<EOL
-# Ограничение по времени для хранения логов
-\$MaxMessageSize 1M    # Максимальный размер для каждого сообщения
-\$MaxFileSize 100M     # Максимальный размер файлов логов
-# Удаление логов старше 3 дней
-\$FileRetentionTime 3d # Удаление логов старше 3 дней
-EOL
-
-    # Перезагрузка rsyslog для применения изменений
-    sudo systemctl restart rsyslog
-    echo "Настройка rsyslog завершена."
 }
 
+# Добавление задания в crontab на очистку syslog и kern.log
+clean_syslog() {
+    echo "Добавление задачи в crontab для очистки логов каждые 15 минут..."
+    CRON_JOB="*/15 * * * * echo '' > /var/log/kern.log && echo '' > /var/log/syslog"
+    (crontab -l 2>/dev/null | grep -v -F "$CRON_JOB" ; echo "$CRON_JOB") | crontab -
+    echo "Задача успешно добавлена в crontab."
+}
 
 echo "logrotate и rsyslog — это инструменты, которые помогают управлять лог-файлами, ограничивая их размер и предотвращая переполнение диска."
 echo "logrotate управляет ротацией и удалением старых логов, а rsyslog ограничивает размер логов и задает параметры их хранения."
-echo "systemd-journald управляет бинарными журналами, и мы будем настраивать его для ограничения размера и времени хранения."
+echo "systemd-journald управляет бинарными журналами, настроем его для ограничения размера и времени хранения."
+
+# Основной сценарий
+echo "Настройка управления логами: logrotate, journald и rsyslog."
 
 if confirm "Установить и настроить logrotate и rsyslog?"; then
     install_logrotate
     install_rsyslog
-else
-    echo "Отменено"
 fi
 
-if confirm "Настроить systemd-journald для ограничения размера журналов и времени хранения?"; then
+if confirm "Настроить systemd-journald?"; then
     configure_journald
-else
-    echo "Отменено"
+fi
+
+echo "В некоторых случаях (лично у меня(tpatop)) проходит настолько большой трафик, что syslog и kern.log занимают ~80гб за сутки каждый."
+echo "самый простой способ для решения данной проблемы - переодически обнулять файлы, что и будет предложено далее."
+if confirm "Добавить задачу для очистки syslog и kern.log каждые 15 минут?"; then
+    clean_syslog
 fi
