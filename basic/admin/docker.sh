@@ -13,8 +13,8 @@ install_docker() {
 # Функция для установки Docker Compose
 install_docker_compose() {
   echo "Docker Compose не найден. Устанавливаю Docker Compose..."
-  sudo apt-get update
-  sudo apt-get install -y docker-compose-plugin
+  sudo apt update
+  sudo apt install -y docker-compose-plugin
   echo "Docker Compose успешно установлен."
 }
 

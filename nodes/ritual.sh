@@ -30,8 +30,8 @@ confirm() {
 install_dependencies() {
     if confirm "Установить необходимые пакеты и зависимости?"; then
         echo "Обновление пакетов и установка зависимостей..."
-        sudo apt-get update -y && sudo apt upgrade -y
-        sudo apt-get install -y make build-essential unzip lz4 gcc git jq ncdu tmux \
+        sudo apt update -y && sudo apt upgrade -y
+        sudo apt install -y make build-essential unzip lz4 gcc git jq ncdu tmux \
         cmake clang pkg-config libssl-dev python3-pip protobuf-compiler bc curl
         echo "Установка Docker и Docker Compose..."
         bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
