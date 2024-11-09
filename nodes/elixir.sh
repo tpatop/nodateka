@@ -68,16 +68,15 @@ update_node() {
         # Обновление Mainnet узла
         echo "Обновляем узел в Mainnet..."
         docker rm -f elixir-mainnet
-        docker pull elixirprotocol/validator:v3
-        docker run -d --env-file ~/elixir/validator.env --name elixir-mainnet --platform linux/amd64 -p 17690:17690 --restart unless-stopped elixirprotocol/validator:v3
+        docker pull elixirprotocol/validator
+        docker run -d --env-file ~/elixir/validator.env --name elixir-mainnet --platform linux/amd64 -p 17690:17690 --restart unless-stopped elixirprotocol/validator
     fi
 
     if docker ps --format '{{.Names}}' | grep -q "elixir-testnet"; then
         # Обновление Testnet узла
         echo "Обновляем узел в Testnet..."
         docker rm -f elixir-testnet
-        docker pull elixirprotocol/validator:v3
-        docker run -d --env-file ~/elixir/testnet.env --name elixir-testnet --platform linux/amd64 -p 17691:17690 --restart unless-stopped elixirprotocol/validator:v3
+        docker run -d --env-file ~/elixir/testnet.env --name elixir-testnet --platform linux/amd64 -p 17691:17690 --restart unless-stopped elixirprotocol/validator:testnet
     fi
 }
 # Функция для мониторинга работы узла в Mainnet
