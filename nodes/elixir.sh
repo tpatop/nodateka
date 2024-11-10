@@ -51,8 +51,8 @@ install_node() {
     fi
 
     # Скачивание образа Docker для Elixir
-    echo "Скачиваем образ Docker..."
-    docker pull elixirprotocol/validator:v3
+    #echo "Скачиваем образ Docker..."
+    #docker pull elixirprotocol/validator
 
     # Сообщение о завершении настройки
     echo "Настройка завершена, дальше запустите узел в выбранной сети."
@@ -68,16 +68,15 @@ update_node() {
         # Обновление Mainnet узла
         echo "Обновляем узел в Mainnet..."
         docker rm -f elixir-mainnet
-        docker pull elixirprotocol/validator:v3
-        docker run -d --env-file ~/elixir/validator.env --name elixir-mainnet --platform linux/amd64 -p 17690:17690 --restart unless-stopped elixirprotocol/validator:v3
+        #docker pull elixirprotocol/validator
+        docker run -d --env-file ~/elixir/validator.env --name elixir-mainnet --platform linux/amd64 -p 17690:17690 --restart unless-stopped elixirprotocol/validator
     fi
 
     if docker ps --format '{{.Names}}' | grep -q "elixir-testnet"; then
         # Обновление Testnet узла
         echo "Обновляем узел в Testnet..."
         docker rm -f elixir-testnet
-        docker pull elixirprotocol/validator:v3
-        docker run -d --env-file ~/elixir/testnet.env --name elixir-testnet --platform linux/amd64 -p 17691:17690 --restart unless-stopped elixirprotocol/validator:v3
+        docker run -d --env-file ~/elixir/testnet.env --name elixir-testnet --platform linux/amd64 -p 17691:17690 --restart unless-stopped elixirprotocol/validator:testnet
     fi
 }
 # Функция для мониторинга работы узла в Mainnet
@@ -106,8 +105,8 @@ start_mainnet() {
         echo "Найден старый контейнер 'elixir-mainnet'. Удаление..."
         docker rm -f elixir-mainnet
     fi
-    docker pull elixirprotocol/validator:v3
-    docker run -d --env-file ~/elixir/validator.env --name elixir-mainnet --platform linux/amd64 -p 17690:17690 --restart unless-stopped elixirprotocol/validator:v3
+    #docker pull elixirprotocol/validator:v3
+    docker run -d --env-file ~/elixir/validator.env --name elixir-mainnet --platform linux/amd64 -p 17690:17690 --restart unless-stopped elixirprotocol/validator
 }
 
 # Функция для запуска узла в Testnet
@@ -125,8 +124,8 @@ start_testnet() {
         echo "Найден старый контейнер 'elixir-testnet'. Удаление..."
         docker rm -f elixir-testnet
     fi
-    docker pull elixirprotocol/validator:v3
-    docker run -d --env-file ~/elixir/testnet.env --name elixir-testnet --platform linux/amd64 -p 17691:17690 --restart unless-stopped elixirprotocol/validator:v3
+    #docker pull elixirprotocol/validator:v3
+    docker run -d --env-file ~/elixir/testnet.env --name elixir-testnet --platform linux/amd64 -p 17691:17690 --restart unless-stopped elixirprotocol/validator:testnet
 }
 
 # Основной цикл для работы меню
