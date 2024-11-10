@@ -29,7 +29,7 @@ set_iptables_rules() {
     echo "Разрешение исходящего трафика в диапазоне Docker от 172.17.0.0/16 до 172.40.0.0/16"
     for i in $(seq 17 40); do
         iptables -A OUTPUT -d 172.$i.0.0/16 -j ACCEPT
-        iptables -A INPUT -s 172.$i.0.0/16 -j ACCEPT
+        # iptables -A INPUT -s 172.$i.0.0/16 -j ACCEPT
     done
     sleep 1
 

@@ -80,7 +80,7 @@ configure_files() {
         echo "Настройка файлов конфигурации..."
 
         # Параметры с пользовательским вводом
-        read -p "Введите ваш private_key: " PRIVATE_KEY
+        read -p "Введите ваш private_key (c 0x): " PRIVATE_KEY
         read -p "Введите значение sleep [3]: " SLEEP
         SLEEP=${SLEEP:-3}
         read -p "Введите значение batch_size [1800]: " BATCH_SIZE
