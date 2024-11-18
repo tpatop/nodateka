@@ -59,6 +59,7 @@ while read -r $PROXY_FILE; do
   [[ -z "$proxy" ]] && continue
 
   IFS=':' read -r proxy_type proxy_ip proxy_port proxy_username proxy_password <<< "$proxy"
+  proxy_ip=$(echo "$proxy_ip" | sed 's#^//##')
   container_name="chromium_container_$container_count"
   local_port=$((start_local_port + container_count - 1))
 
@@ -125,6 +126,16 @@ EOL
   fi
 
   container_count=$((container_count + 1))
+
+  # Запуск redsocks на хосте
+  show "Запуск redsocks на хосте для контейнера $container_name"
+  sudo redsocks -c "$REDSOCKS_CONF" &
+  if [[ $? -eq 0 ]]; then
+    show "Redsocks успешно запущен на хосте для контейнера $container_name."
+  else
+    error "Не удалось запустить redsocks на хосте для контейнера $container_name."
+    exit 1
+  fi
 
   # Вывод информации о подключении
   show "Откройте этот адрес http://$(hostname -I | awk '{print $1}'):$local_port/ для запуска браузера извне"
