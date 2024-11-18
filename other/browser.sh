@@ -1,14 +1,10 @@
 #!/bin/bash
 
-
 # Логотип команды
-show_logotip(){
-    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
-}
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
 
 # Вызов скрипта для проверки и установки Docker и Docker Compose
 bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
-
 
 # Функция для вывода ошибок
 error() {
@@ -48,9 +44,6 @@ cat <<EOL > "$CREDENTIALS_FILE"
 EOL
 chmod 600 "$CREDENTIALS_FILE"
 
-# Создание конфигурационной папки
-mkdir -p "$HOME/chromium/config"
-
 # Читаем прокси из файла
 PROXY_FILE="proxy.txt"
 if [[ ! -f $PROXY_FILE ]]; then
@@ -68,6 +61,10 @@ while read -r proxy; do
   IFS=':' read -r proxy_type proxy_ip proxy_port proxy_username proxy_password <<< "$proxy"
   container_name="chromium_container_$container_count"
   local_port=$((start_local_port + container_count - 1))
+
+  # Создаем уникальную конфигурационную папку для каждого контейнера
+  CONFIG_DIR="$HOME/chromium/config_$container_name"
+  mkdir -p "$CONFIG_DIR"
 
   # Создаем индивидуальный redsocks.conf
   REDSOCKS_CONF="$HOME/redsocks_$container_name.conf"
@@ -105,7 +102,7 @@ EOL
     -e TITLE=Nodateka \
     -e DISPLAY=:1 \
     -e PASSWORD="$PASSWORD" \
-    -v "$HOME/chromium/config:/config" \
+    -v "$CONFIG_DIR:/config" \
     --shm-size="2gb" \
     --restart unless-stopped \
     lscr.io/linuxserver/chromium:latest
