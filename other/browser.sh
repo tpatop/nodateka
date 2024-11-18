@@ -55,7 +55,7 @@ fi
 container_count=1
 start_local_port=12000
 
-while read -r proxy; do
+while read -r $PROXY_FILE; do
   [[ -z "$proxy" ]] && continue
 
   IFS=':' read -r proxy_type proxy_ip proxy_port proxy_username proxy_password <<< "$proxy"
