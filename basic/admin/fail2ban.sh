@@ -34,7 +34,7 @@ filter = sshd
 logpath = /var/log/auth.log
 maxretry = 3
 findtime = 6000
-bantime = 36000
+bantime = -1
 EOL
 
     echo "✅ Конфигурация для sshd создана."

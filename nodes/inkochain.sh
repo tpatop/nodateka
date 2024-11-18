@@ -30,7 +30,7 @@ cd node
 echo "Запускаю скрипт установки"
 ./setup.sh
 
-required_ports=("3000" "5000" "2020" "24224" "6379" "4999", "4998")
+required_ports=("8545" "8546" "30303" "7301" "9545" "9222", "7300", "6060")
     
 for port in "${required_ports[@]}"; do
     if ss -tuln | grep -q ":$port "; then

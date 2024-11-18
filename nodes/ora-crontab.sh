@@ -5,13 +5,24 @@ show_logotip(){
     bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
 }
 
-# Функция для скачивания скрипта ora-restart.sh, если его еще нет
-download_script() {
+# Функция для создания скрипта ora-restart.sh, если его еще нет
+create_script() {
     if [ ! -f ~/tora/ora-restart.sh ]; then
         mkdir -p ~/tora
-        wget -O ~/tora/ora-restart.sh https://github.com/tpatop/nodateka/blob/main/nodes/ora-restart.sh
+        cat << 'EOF' > ~/tora/ora-restart.sh
+#!/bin/bash
+
+# Проверка, запущен ли контейнер ora-tora
+if [ "$(docker inspect -f '{{.State.Running}}' ora-tora)" == "false" ]; then
+    echo "$(date): Ora-tora упал, выполняется перезапуск..." >> ~/tora/restart.log
+    docker start ora-tora
+    echo "$(date): Ora-tora успешно перезапущен." >> ~/tora/restart.log
+else
+    echo "$(date): Ora-tora работает корректно." >> ~/tora/restart.log
+fi
+EOF
         chmod +x ~/tora/ora-restart.sh
-        echo "Скрипт ora-restart.sh успешно скачан и установлен как исполняемый."
+        echo "Скрипт ora-restart.sh успешно создан и установлен как исполняемый."
     else
         echo "Скрипт ora-restart.sh уже существует."
     fi
@@ -20,7 +31,7 @@ download_script() {
 # Функция для добавления задания в crontab
 add_cron_job() {
     cron_job="$1 ~/tora/ora-restart.sh"
-    existing_jobs=$(crontab -l |grep ora-restart.sh)
+    existing_jobs=$(crontab -l | grep ora-restart.sh)
     
     if [ -n "$existing_jobs" ]; then
         echo "Задание уже существует:"
@@ -60,7 +71,7 @@ read -p "Введите номер действия (1, 2, 3 или 0): " action
 case "$action" in
     1)
         # Установка запуска в определенное время
-        download_script
+        create_script
         read -p "Введите время в формате ЧЧ:ММ для запуска скрипта (например, 04:15): " schedule_time
         # Разделяем введенное время на часы и минуты
         IFS=: read hour minute <<< "$schedule_time"
@@ -69,7 +80,7 @@ case "$action" in
         ;;
     2)
         # Установка запуска каждые X часов
-        download_script
+        create_script
         while true; do
             read -p "Введите интервал в часах для запуска скрипта (1-12): " interval_hours
             if [[ "$interval_hours" =~ ^[1-9]$ || "$interval_hours" =~ ^1[0-9]$ || "$interval_hours" == "12" ]]; then

@@ -59,9 +59,9 @@ delaycompress
 maxsize 100M
 # Включаем проверку файлов
 create
-# Перезапускать службу после ротации логов (например, syslog)
+# Перезапускать службу после ротации логов
 postrotate
-    systemctl reload syslog.service
+    systemctl reload rsyslog > /dev/null 2>/dev/null || true
 endscript
 EOL
 
@@ -83,6 +83,7 @@ MaxRetentionSec=2d
 EOL
 
     # Перезапуск systemd-journald для применения настроек
+    sudo systemctl restart systemd-journald.socket
     sudo systemctl restart systemd-journald
     echo "Настройка systemd-journald завершена."
 }
@@ -107,7 +108,7 @@ clean_syslog() {
 }
 
 echo "logrotate и rsyslog — это инструменты, которые помогают управлять лог-файлами, ограничивая их размер и предотвращая переполнение диска."
-echo "logrotate управляет ротацией и удалением старых логов, а rsyslog ограничивает размер логов и задает параметры их хранения."
+echo "logrotate управляет ротацией и удалением старых логов, а rsyslog отвечает за создание и запись логов в файлы."
 echo "systemd-journald управляет бинарными журналами, настроем его для ограничения размера и времени хранения."
 
 # Основной сценарий
