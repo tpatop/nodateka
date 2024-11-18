@@ -16,6 +16,8 @@ show() {
   echo -e "\e[32m[INFO]\e[0m $1"
 }
 
+sudo apt install redsocks iptables -y 
+
 # Запрашиваем имя пользователя
 read -p "Введите имя пользователя: " USERNAME
 if [[ -z "$USERNAME" ]]; then
