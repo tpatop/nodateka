@@ -125,4 +125,8 @@ EOL
   fi
 
   container_count=$((container_count + 1))
+
+  # Вывод информации о подключении
+  show "Откройте этот адрес http://$(hostname -I | awk '{print $1}'):$local_port/ для запуска браузера извне"
+
 done < "$PROXY_FILE"
