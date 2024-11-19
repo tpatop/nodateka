@@ -5,10 +5,17 @@ show_logotip() {
     bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
 }
 
+# Вывод названия узла
+show_name() {
+    echo ""
+    echo "INK chain node"
+    echo ""
+}
+
 # Функция для подтверждения действия
 confirm() {
     local prompt="$1"
-    read -p "$prompt [y/n]: " choice
+    read -p "$prompt [Y/n]: " choice
     if [[ -z "$choice" || "$choice" == "y" ]]; then
         return 0  # Выполнить действие
     else
@@ -136,12 +143,14 @@ delete() {
 # Меню с командами
 show_menu() {
     show_logotip
+    show_name
     echo "Выберите действие:"
     echo "1. Установить ноду"
-    echo "2. Тестовый запрос к ноде"
-    echo "3. Вывод приватного ключа"
-    echo "4. Просмотр логов ноды"
-    echo "5. Удаление ноды"
+    echo "2. Просмотр логов ноды"
+    echo "3. Тестовый запрос к ноде"
+    echo "4. Проверка контейнеров"
+    echo "8. Вывод приватного ключа"
+    echo "9. Удаление ноды"
     echo "0. Выход"
 }
 
@@ -151,10 +160,11 @@ menu() {
             install_dependencies
             install_node 
             ;;
-        2)  curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' -H "Content-Type: application/json" http://localhost:8525 | jq ;;
-        3)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
-        4)  cd "$ink_dir" && docker compose logs -f --tail 20 ;;
-        5)  delete ;;
+        2)  cd "$ink_dir" && docker compose logs -f --tail 20 ;;
+        3)  curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' -H "Content-Type: application/json" http://localhost:8525 | jq ;;
+        4)  cd ~/node && docker compose ps -a
+        8)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
+        9)  delete ;;
         0)  exit 0 ;;
         *)  echo "Неверный выбор, попробуйте снова." ;;
     esac
