@@ -27,43 +27,44 @@ fi
 echo "Переход в директорию узла..."
 cd node
 
-echo "Запускаю скрипт установки"
-./setup.sh
-
-required_ports=("8545" "8546" "30303" "7301" "9545" "9222", "7300", "6060")
+required_ports=("8525" "8526" "30313" "7301" "9535" "9232", "7300", "6060")
     
 for port in "${required_ports[@]}"; do
     if ss -tuln | grep -q ":$port "; then
         echo "Порт $port: ЗАНЯТ"
+        exit 1
     else
         echo "Порт $port: СВОБОДЕН"
     fi
 done
 
-
-
 # Проверяем, существует ли файл .env.sepolia
-if [ -f ".env.sepolia" ]; then
-  echo "Файл .env.sepolia найден. Замена переменных..."
+if [ -f ".env.ink-sepolia" ]; then
+  echo "Файл .env.ink-sepolia найден. Замена переменных..."
   sed -i 's|^OP_NODE_L1_ETH_RPC=.*|OP_NODE_L1_ETH_RPC=https://ethereum-sepolia-rpc.publicnode.com|' .env.sepolia
   sed -i 's|^OP_NODE_L1_BEACON=.*|OP_NODE_L1_BEACON=https://ethereum-sepolia-beacon-api.publicnode.com|' .env.sepolia
   echo "Переменные успешно заменены."
 else
-  echo "Ошибка: файл .env.sepolia не найден!"
+  echo "Ошибка: файл .env.ink-sepolia не найден!"
   exit 1
 fi
 
 # Проверяем, существует ли файл docker-compose.yml
 if [ -f "docker-compose.yml" ]; then
   echo "Файл docker-compose.yml найден. Замена портов..."
-  sed -i 's|30303:|33303:|g' docker-compose.yml
-  sed -i 's|8545:|8945:|g' docker-compose.yml
-  sed -i 's|8546:|8946:|g' docker-compose.yml
+  sed -i 's|8545:|8525:|g' docker-compose.yml
+  sed -i 's|8546:|8526:|g' docker-compose.yml
+  sed -i 's|30303:|30313:|g' docker-compose.yml
+  sed -i 's|9545:|9535:|g' docker-compose.yml
+  sed -i 's|9222:|9232:|g' docker-compose.yml
   echo "Порты успешно заменены."
 else
   echo "Ошибка: файл docker-compose.yml не найден!"
   exit 1
 fi
+
+echo "Запускаю скрипт установки"
+./setup.sh
 
 echo "Запуск Docker Compose..."
 docker compose up -d
@@ -85,6 +86,6 @@ echo '   curl -d '\''{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","pa
 echo "2. Вывод приватного ключа:"
 echo '   cat ~/unichain-node/geth-data/geth/nodekey'
 echo "3. Логи ноды:"
-echo '   cd ~/unichain-node && docker compose logs -f'
+echo '   cd ~/node && docker compose logs -f --tail 20'
 echo "4. Удаление ноды:"
-echo '   cd ~/unichain-node && docker compose down && cd ~ && rm -rf ~/unichain-node'
+echo '   cd ~/node && docker compose down && cd ~ && rm -rf ~/node'
