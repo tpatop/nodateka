@@ -101,9 +101,11 @@ EOL
   show "Запуск контейнера $container_name..."
   docker run -d --name "$container_name" \
     --privileged \
-    --network host \
-    -e TITLE=Nodateka \
+    -e TITLE=caf \
     -e DISPLAY=:1 \
+    -e PUID=1000 \
+    -e PGID=1000 \
+    -e CUSTOM_USER="$USERNAME" \
     -e PASSWORD="$PASSWORD" \
     -v "$CONFIG_DIR:/config" \
     --shm-size="2gb" \
