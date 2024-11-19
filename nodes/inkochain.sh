@@ -106,6 +106,7 @@ install_node() {
     fi
 
     # Фикс проблемы с правами на доступ к директории
+    sudo mkdir -p "$ink_dir/geth"
     sudo chown -R 1000:1000 "$ink_dir/geth"
     sudo chmod -R 755 "$ink_dir/geth"
 
