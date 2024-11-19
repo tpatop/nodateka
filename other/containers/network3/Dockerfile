@@ -14,4 +14,4 @@ RUN wget https://network3.io/ubuntu-node-v2.1.0.tar && \
 WORKDIR /root/ubuntu-node
 
 # Команда для запуска
-CMD ["bash", "-c", "./manager.sh up && ./manager.sh key > /root/ubuntu-node/key_output.txt && tail -f /dev/null"]
+CMD ["bash", "-c", "./root/ubuntu-node/manager.sh up"]

@@ -10,7 +10,6 @@ fi
 
 # Остановка и удаление контейнеров
 echo "Остановка и удаление всех узлов..."
-docker stop $NODE_CONTAINERS
-docker rm $NODE_CONTAINERS
+docker rm -f $NODE_CONTAINERS
 
 echo "Все узлы успешно удалены."
