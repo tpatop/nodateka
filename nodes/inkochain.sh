@@ -164,7 +164,7 @@ menu() {
             ;;
         2)  cd "$ink_dir" && docker compose logs -f --tail 20 ;;
         3)  curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' -H "Content-Type: application/json" http://localhost:8525 | jq ;;
-        4)  cd ~/node && docker compose ps -a
+        4)  cd ~/node && docker compose ps -a ;;
         8)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
         9)  delete ;;
         0)  exit 0 ;;
