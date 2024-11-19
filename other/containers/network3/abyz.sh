@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Сборка образа
+docker build -t ubuntu-node:latest .
+
 # Получение IP-адреса хоста
 HOST_IP=$(hostname -I | awk '{print $1}')
 
