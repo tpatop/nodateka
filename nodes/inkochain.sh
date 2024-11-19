@@ -105,6 +105,10 @@ install_node() {
         exit 1
     fi
 
+    # Фикс проблемы с правами на доступ к директории
+    sudo chown -R 1000:1000 "$ink_dir/geth"
+    sudo chmod -R 755 "$ink_dir/geth"
+
     # Запуск Docker Compose
     echo "Запуск ноды..."
     docker compose up -d || {
@@ -147,7 +151,7 @@ menu() {
             install_node 
             ;;
         2)  curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' -H "Content-Type: application/json" http://localhost:8525 | jq ;;
-        3)  cat ~/unichain-node/geth-data/geth/nodekey ;;
+        3)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
         4)  cd "$ink_dir" && docker compose logs -f --tail 20 ;;
         5)  delete ;;
         0)  exit 0 ;;
