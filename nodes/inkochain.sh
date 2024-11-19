@@ -137,6 +137,7 @@ delete() {
     cd "$ink_dir" && docker compose down 
     if confirm "Удалить директорию и все данные?"; then
         cd ~ && rm -rf "$ink_dir"
+        echo "Успешно удалено." 
     else
         echo "Не удалено."
     fi
