@@ -22,18 +22,27 @@ ink_dir="$HOME/node"
 install_dependencies() {
     if confirm "Установить необходимые пакеты и зависимости?"; then
         bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
+        sudo apt install jq net-tools
     else
         echo "Отменено."
     fi
 }
 
-# Функция установки ноды
-install_node() {
+clone_rep() {
     echo "Клонирование репозитория Ink node..."
     git clone https://github.com/inkonchain/node.git "$ink_dir" || {
         echo "Ошибка при клонировании репозитория!"
         exit 1
     }
+}
+
+# Функция установки ноды
+install_node() {
+    if confirm "Скачать репозиторий узла?"; then
+        clone_rep
+    else 
+        echo "Пропущено"
+    fi
 
     echo "Переход в директорию узла..."
     cd "$ink_dir" || {
@@ -105,9 +114,18 @@ install_node() {
             exit 1
         }
     }
+    echo "Установка и запуск выполнены успешно!"
+}
 
-    echo "Docker Compose успешно запущен!"
-    echo "Установка выполнена успешно!"
+# Удаление ноды
+delete() {
+    echo "Остановка и удаление контейнеров"
+    cd "$ink_dir" && docker compose down 
+    if confirm "Удалить директорию и все данные?"; then
+        cd ~ && rm -rf "$ink_dir"
+    else
+        echo "Не удалено."
+    fi
 }
 
 # Меню с командами
@@ -131,7 +149,7 @@ menu() {
         2)  curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' -H "Content-Type: application/json" http://localhost:8525 | jq ;;
         3)  cat ~/unichain-node/geth-data/geth/nodekey ;;
         4)  cd "$ink_dir" && docker compose logs -f --tail 20 ;;
-        5)  cd "$ink_dir" && docker compose down && cd ~ && rm -rf "$ink_dir" ;;
+        5)  delete ;;
         0)  exit 0 ;;
         *)  echo "Неверный выбор, попробуйте снова." ;;
     esac
