@@ -108,7 +108,7 @@ install_node() {
         echo "Запускаю скрипт установки..."
         ./setup.sh
         echo "Удаление архива снепшота"
-        rm -rf geth-datadir-*
+        rm -f *.tar.gz
     else
         echo "Ошибка: setup.sh не найден или не является исполняемым!"
         exit 1
