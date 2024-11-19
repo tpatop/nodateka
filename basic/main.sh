@@ -59,6 +59,7 @@ show_node_list() {
     echo -e "2. Unichain"
     echo -e "3. Ritual"
     echo -e "4. Ora (перезапуск)"
+    echo -e "5. INK"
     echo "0. Выход"
 }
 
@@ -69,6 +70,7 @@ node_menu() {
         2) bash <(curl -s ${BASE_URL}/unichain.sh) ;;
         3) bash <(curl -s ${BASE_URL}/ritual.sh) ;;   
         4) bash <(curl -s ${BASE_URL}/ora-crontab.sh) ;; 
+        5) bash <(curl -s ${BASE_URL}/inkochain.sh) ;; 
         0) echo "Выход."; exit 0 ;;
         *) echo "Неверный выбор. Попробуйте снова." ;;
     esac
