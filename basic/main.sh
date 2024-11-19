@@ -68,7 +68,7 @@ node_menu() {
         1) bash <(curl -s ${BASE_URL}/elixir.sh) ;;
         2) bash <(curl -s ${BASE_URL}/unichain.sh) ;;
         3) bash <(curl -s ${BASE_URL}/ritual.sh) ;;   
-        4) bash <(curl -s ${BASE_URL}/ora-restart.sh) ;; 
+        4) bash <(curl -s ${BASE_URL}/ora-crontab.sh) ;; 
         0) echo "Выход."; exit 0 ;;
         *) echo "Неверный выбор. Попробуйте снова." ;;
     esac
