@@ -34,45 +34,73 @@ ink_dir="$HOME/ink/node"
 
 # Функция для установки зависимостей
 install_dependencies() {
-    if confirm "Установить необходимые пакеты и зависимости?"; then
-        bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
-        sudo apt install jq net-tools
-    else
-        echo "Отменено."
-    fi
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
+    sudo apt install jq net-tools -y
 }
 
 clone_rep() {
     echo "Клонирование репозитория Ink node..."
-    git clone https://github.com/inkonchain/node.git "$ink_dir" || {
-        echo "Репозиторий уже скачан."
-    }
+    if [ -d "$ink_dir" ]; then
+        echo "Репозиторий уже скачан. Пропуск клонирования."
+    else
+        git clone https://github.com/inkonchain/node.git "$ink_dir" || {
+            echo "Ошибка: не удалось клонировать репозиторий."
+            exit 1
+        }
+    fi
 }
 
 # Функция установки ноды
 install_node() {
-    mkdir ~/ink && ~/ink
-    if confirm "Скачать репозиторий узла?"; then
-        clone_rep
-    else 
-        echo "Пропущено"
-    fi
+    mkdir -p ~/ink && cd ~/ink
+    clone_rep
 
     echo "Переход в директорию узла..."
     cd "$ink_dir" || {
         echo "Ошибка: директория node не найдена!"
     }
 
-    # Массив с необходимыми портами
-    required_ports=("8525" "8526" "30313" "7301" "9515" "9232" "7300" "6060")
+    # Проверка и замена портов в docker-compose.yml
+    compose_file="$ink_dir/docker-compose.yml"
+    if [ -f "$compose_file" ]; then
+        echo "Файл $compose_file найден. Проверка и настройка портов..."
 
-    # Проверка доступности портов
-    for port in "${required_ports[@]}"; do
-        if ss -tuln | grep -q ":$port "; then
-            echo "Порт $port: ЗАНЯТ"
-        else
-            echo "Порт $port: СВОБОДЕН"
+        # Массив с портами и их назначением
+        declare -A port_mapping=(
+            ["8545"]="8525"
+            ["8546"]="8526"
+            ["30303"]="30313"
+            ["9545"]="9515"
+            ["9222"]="9232"
+        )
+
+    for original_port in "${!port_mapping[@]}"; do
+        new_port=${port_mapping[$original_port]}
+        echo "Проверка порта $new_port..."
+
+        # Если порт занят, запрос нового значения
+        while ss -tuln | grep -q ":$new_port "; do
+            echo "Порт $new_port занят."
+            read -p "Введите новый порт для замены $original_port (текущий: $new_port): " user_port
+            if [[ $user_port =~ ^[0-9]+$ && $user_port -ge 1 && $user_port -le 65535 ]]; then
+                if ss -tuln | grep -q ":$user_port "; then
+                    echo "Ошибка: введённый порт $user_port тоже занят. Попробуйте снова."
+                else
+                    new_port=$user_port
+                    break  # Выход из цикла, если порт свободен
+                fi
+            else
+                echo "Некорректный ввод. Попробуйте снова."
+            fi
+        done
+
+        # Замена порта в файле docker-compose.yml
+        sed -i "s|$original_port:|$new_port:|g" "$compose_file"
+        if [ "$original_port" -eq 8545 ]; then
+            export INK_RPC_PORT="$new_port"
+            echo "INK_RPC_PORT=$new_port" >> ~/.bashrc  # Сохранение в .bashrc для будущих сессий
         fi
+        echo "Настройка порта завершена."
     done
 
     # Проверка и замена переменных в .env.ink-sepolia
@@ -90,21 +118,6 @@ install_node() {
         echo "Переменные успешно обновлены"
     else
         echo "Ошибка: файл $env_file не найден!"
-        exit 0
-    fi
-
-    # Проверка и замена портов в docker-compose.yml
-    compose_file="$ink_dir/docker-compose.yml"
-    if [ -f "$compose_file" ]; then
-        echo "Файл $compose_file найден. Замена портов..."
-        sed -i 's|8545:|8525:|g' "$compose_file"
-        sed -i 's|8546:|8526:|g' "$compose_file"
-        sed -i 's|30303:|30313:|g' "$compose_file"
-        sed -i 's|9545:|9515:|g' "$compose_file"
-        sed -i 's|9222:|9232:|g' "$compose_file"
-        echo "Порты успешно заменены."
-    else
-        echo "Ошибка: файл $compose_file не найден!"
         exit 0
     fi
 
@@ -169,8 +182,25 @@ menu() {
             install_node 
             ;;
         2)  cd "$ink_dir" && docker compose logs -f --tail 20 ;;
-        3)  curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' -H "Content-Type: application/json" http://localhost:8525 | jq ;;
-        4)  cd "$ink_dir" && docker compose ps -a ;;
+        3)  
+            : "${INK_RPC_PORT:=8525}"
+            if ! command -v jq &>/dev/null; then
+                echo "Ошибка: jq не установлен. Установите его с помощью: sudo apt install jq"
+                exit 1
+            fi
+            if curl -s http://localhost:"$INK_RPC_PORT" &>/dev/null; then
+                curl -s -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
+                     -H "Content-Type: application/json" \
+                     http://localhost:"$INK_RPC_PORT" | jq
+            else
+                echo "Ошибка: RPC на порту $INK_RPC_PORT недоступен. Проверьте, запущен ли узел."
+            fi ;;
+        4)  
+            if [ -d "$ink_dir" ]; then
+                cd "$ink_dir" && docker compose ps -a
+            else
+                echo "Ошибка: директория $ink_dir не найдена."
+            fi ;;
         8)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
         9)  delete ;;
         0)  exit 0 ;;
