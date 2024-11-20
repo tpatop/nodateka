@@ -74,34 +74,35 @@ install_node() {
             ["9222"]="9232"
         )
 
-    for original_port in "${!port_mapping[@]}"; do
-        new_port=${port_mapping[$original_port]}
-        echo "Проверка порта $new_port..."
+        for original_port in "${!port_mapping[@]}"; do
+            new_port=${port_mapping[$original_port]}
+            echo "Проверка порта $new_port..."
 
-        # Если порт занят, запрос нового значения
-        while ss -tuln | grep -q ":$new_port "; do
-            echo "Порт $new_port занят."
-            read -p "Введите новый порт для замены $original_port (текущий: $new_port): " user_port
-            if [[ $user_port =~ ^[0-9]+$ && $user_port -ge 1 && $user_port -le 65535 ]]; then
-                if ss -tuln | grep -q ":$user_port "; then
-                    echo "Ошибка: введённый порт $user_port тоже занят. Попробуйте снова."
+            # Если порт занят, запрос нового значения
+            while ss -tuln | grep -q ":$new_port "; do
+                echo "Порт $new_port занят."
+                read -p "Введите новый порт для замены $original_port (текущий: $new_port): " user_port
+                if [[ $user_port =~ ^[0-9]+$ && $user_port -ge 1 && $user_port -le 65535 ]]; then
+                    if ss -tuln | grep -q ":$user_port "; then
+                        echo "Ошибка: введённый порт $user_port тоже занят. Попробуйте снова."
+                    else
+                        new_port=$user_port
+                        break  # Выход из цикла, если порт свободен
+                    fi
                 else
-                    new_port=$user_port
-                    break  # Выход из цикла, если порт свободен
+                    echo "Некорректный ввод. Попробуйте снова."
                 fi
-            else
-                echo "Некорректный ввод. Попробуйте снова."
-            fi
-        done
+            done
 
-        # Замена порта в файле docker-compose.yml
-        sed -i "s|$original_port:|$new_port:|g" "$compose_file"
-        if [ "$original_port" -eq 8545 ]; then
-            export INK_RPC_PORT="$new_port"
-            echo "INK_RPC_PORT=$new_port" >> ~/.bashrc  # Сохранение в .bashrc для будущих сессий
-        fi
-        echo "Настройка порта завершена."
-    done
+            # Замена порта в файле docker-compose.yml
+            sed -i "s|$original_port:|$new_port:|g" "$compose_file"
+            if [ "$original_port" -eq 8545 ]; then
+                export INK_RPC_PORT="$new_port"
+                echo "INK_RPC_PORT=$new_port" >> ~/.bashrc  # Сохранение в .bashrc для будущих сессий
+            fi
+            echo "Настройка порта завершена."
+        done
+    fi
 
     # Проверка и замена переменных в .env.ink-sepolia
     env_file="$ink_dir/.env.ink-sepolia"
@@ -147,8 +148,7 @@ install_node() {
         }
     }
     echo "Установка и запуск выполнены успешно!"
-
-}
+}  # Закрытие функции install_node
 
 # Удаление ноды
 delete() {
