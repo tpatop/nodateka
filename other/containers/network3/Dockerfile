@@ -2,7 +2,7 @@
 FROM ubuntu:latest
 
 # Установить net-tools и wget
-RUN apt update && apt install -y net-tools wget
+RUN apt update && apt install -y net-tools wget iproute2
 
 # Скачиваем архив и распаковываем его
 WORKDIR /root
