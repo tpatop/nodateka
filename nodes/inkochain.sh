@@ -59,12 +59,12 @@ install_node() {
     cd "$ink_dir" || {
         echo "Ошибка: директория node не найдена!"
     }
-
+   
     # Проверка и замена портов в docker-compose.yml
     compose_file="$ink_dir/docker-compose.yml"
     if [ -f "$compose_file" ]; then
         echo "Файл $compose_file найден. Проверка и настройка портов..."
-
+        docker compose down
         # Массив с портами и их назначением
         declare -A port_mapping=(
             ["8545"]="8525"
@@ -140,13 +140,13 @@ install_node() {
 
     # Запуск Docker Compose
     echo "Запуск ноды..."
-    docker compose down && docker compose up -d || {
-        echo "Ошибка при запуске Docker Compose!"
+    docker compose up -d || {
+        echo "Ошибка при запуске узла!"
         exit 0
     }
 
     echo "Установка и запуск выполнены успешно!"
-}  # Закрытие функции install_node
+}
 
 # Удаление ноды
 delete() {
