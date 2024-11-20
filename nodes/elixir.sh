@@ -68,7 +68,7 @@ update_node() {
         # Обновление Mainnet узла
         echo "Обновляем узел в Mainnet..."
         docker rm -f elixir-mainnet
-        #docker pull elixirprotocol/validator
+        docker pull elixirprotocol/validator
         docker run -d --env-file ~/elixir/validator.env --name elixir-mainnet --platform linux/amd64 -p 17690:17690 --restart unless-stopped elixirprotocol/validator
     fi
 
@@ -76,6 +76,7 @@ update_node() {
         # Обновление Testnet узла
         echo "Обновляем узел в Testnet..."
         docker rm -f elixir-testnet
+        docker pull elixirprotocol/validator:testnet
         docker run -d --env-file ~/elixir/testnet.env --name elixir-testnet --platform linux/amd64 -p 17691:17690 --restart unless-stopped elixirprotocol/validator:testnet
     fi
 }
@@ -105,7 +106,7 @@ start_mainnet() {
         echo "Найден старый контейнер 'elixir-mainnet'. Удаление..."
         docker rm -f elixir-mainnet
     fi
-    #docker pull elixirprotocol/validator:v3
+    docker pull elixirprotocol/validator
     docker run -d --env-file ~/elixir/validator.env --name elixir-mainnet --platform linux/amd64 -p 17690:17690 --restart unless-stopped elixirprotocol/validator
 }
 
@@ -124,7 +125,7 @@ start_testnet() {
         echo "Найден старый контейнер 'elixir-testnet'. Удаление..."
         docker rm -f elixir-testnet
     fi
-    #docker pull elixirprotocol/validator:v3
+    docker pull elixirprotocol/validator:testnet
     docker run -d --env-file ~/elixir/testnet.env --name elixir-testnet --platform linux/amd64 -p 17691:17690 --restart unless-stopped elixirprotocol/validator:testnet
 }
 
