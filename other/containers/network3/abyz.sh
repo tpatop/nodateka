@@ -34,8 +34,7 @@ for i in $(seq 1 $NUM_NODES); do
 
     # Удаление существующего контейнера с таким именем
     if docker ps -a --format '{{.Names}}' | grep -q "^$NODE_NAME$"; then
-        docker stop $NODE_NAME
-        docker rm $NODE_NAME
+        continue
     fi
 
     # Запуск контейнера с указанием нового порта
@@ -69,7 +68,7 @@ for NODE_NAME in "${!NODE_INFO[@]}"; do
     fi
 
     NODE_URL="https://account.network3.ai/main?o=$HOST_IP:$NODE_PORT"
-    OUTPUT_LINE="$NODE_URL ./manager.sh key: $NODE_KEY"
+    OUTPUT_LINE="$NODE_URL $NODE_KEY"
 
     # Сохранение строки в файл
     echo $OUTPUT_LINE >> $OUTPUT_FILE
