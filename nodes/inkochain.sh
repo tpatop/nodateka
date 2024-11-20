@@ -45,7 +45,7 @@ clone_rep() {
     else
         git clone https://github.com/inkonchain/node.git "$ink_dir" || {
             echo "Ошибка: не удалось клонировать репозиторий."
-            exit 1
+            exit 0
         }
     fi
 }
