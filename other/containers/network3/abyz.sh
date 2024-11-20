@@ -59,7 +59,9 @@ sleep 5
 # Обработка каждого контейнера для получения ключей и сохранения в файл
 for NODE_NAME in "${!NODE_INFO[@]}"; do
     NODE_PORT=${NODE_INFO[$NODE_NAME]}
-    NODE_KEY=$(docker exec $NODE_NAME bash -c "./manager.sh key" 2>/dev/null)
+    
+    # Получение ключа и удаление ненужной строки из всего вывода
+    NODE_KEY=$(docker exec $NODE_NAME bash -c "./manager.sh key" | sed 's/System architecture is x86_64 (64-bit)//g')
 
     if [ $? -ne 0 ]; then
         echo "Ошибка получения ключа для узла $NODE_NAME."
@@ -67,7 +69,7 @@ for NODE_NAME in "${!NODE_INFO[@]}"; do
     fi
 
     NODE_URL="https://account.network3.ai/main?o=$HOST_IP:$NODE_PORT"
-    OUTPUT_LINE="$NODE_URL $NODE_KEY"
+    OUTPUT_LINE="$NODE_URL ./manager.sh key: $NODE_KEY"
 
     # Сохранение строки в файл
     echo $OUTPUT_LINE >> $OUTPUT_FILE
