@@ -30,7 +30,11 @@ for i in $(seq 1 $NUM_NODES); do
     echo "Запуск узла $NODE_NAME на порту $NODE_PORT..."
 
     # Запуск контейнера с указанием нового порта
-    docker run -d --name $NODE_NAME -p $NODE_PORT:8080 ubuntu-node:latest
+    docker run -d --name $NODE_NAME -p $NODE_PORT:8080  \
+        --cap-add=NET_ADMIN \
+        --device=/dev/net/tun \
+        --restart=always \ 
+        ubuntu-node:latest
 
     # Выполнение команды ./manager.sh key внутри контейнера и получение ключа
     NODE_KEY=$(docker exec $NODE_NAME bash -c "./manager.sh key")
