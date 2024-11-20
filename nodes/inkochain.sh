@@ -42,7 +42,6 @@ clone_rep() {
     echo "Клонирование репозитория Ink node..."
     if [ -d "$ink_dir" ]; then
         echo "Репозиторий уже скачан. Пропуск клонирования."
-        exit 0
     else
         git clone https://github.com/inkonchain/node.git "$ink_dir" || {
             echo "Ошибка: не удалось клонировать репозиторий."
