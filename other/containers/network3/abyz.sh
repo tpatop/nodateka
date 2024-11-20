@@ -34,6 +34,8 @@ for i in $(seq 1 $NUM_NODES); do
 
     # Удаление существующего контейнера с таким именем
     if docker ps -a --format '{{.Names}}' | grep -q "^$NODE_NAME$"; then
+        echo "Уже запущен. Пропуск."
+        NODE_INFO[$NODE_NAME]=$NODE_PORT
         continue
     fi
 
