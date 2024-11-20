@@ -65,7 +65,7 @@ install_node() {
     }
 
     # Массив с необходимыми портами
-    required_ports=("8525" "8526" "30313" "7301" "9535" "9232" "7300" "6060")
+    required_ports=("8525" "8526" "30313" "7301" "9515" "9232" "7300" "6060")
 
     # Проверка доступности портов
     for port in "${required_ports[@]}"; do
@@ -102,7 +102,7 @@ install_node() {
         sed -i 's|8545:|8525:|g' "$compose_file"
         sed -i 's|8546:|8526:|g' "$compose_file"
         sed -i 's|30303:|30313:|g' "$compose_file"
-        sed -i 's|9545:|9535:|g' "$compose_file"
+        sed -i 's|9545:|9515:|g' "$compose_file"
         sed -i 's|9222:|9232:|g' "$compose_file"
         echo "Порты успешно заменены."
     else
