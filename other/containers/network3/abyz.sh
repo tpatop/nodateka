@@ -33,11 +33,15 @@ for i in $(seq 1 $NUM_NODES); do
     docker run -d --name $NODE_NAME -p $NODE_PORT:8080  \
         --cap-add=NET_ADMIN \
         --device=/dev/net/tun \
-        --restart=always \ 
+        --restart=always \
         ubuntu-node:latest
 
-    # Выполнение команды ./manager.sh key внутри контейнера и получение ключа
-    NODE_KEY=$(docker exec $NODE_NAME bash -c "./manager.sh key")
+     # Выполнение команды ./manager.sh key внутри контейнера и получение ключа
+    NODE_KEY=$(docker exec $NODE_NAME bash -c "./manager.sh key" 2>/dev/null)
+    if [ $? -ne 0 ]; then
+        echo "Ошибка получения ключа для узла $NODE_NAME."
+        continue
+    fi
 
     # Формирование строки с URL и ключом
     NODE_URL="https://account.network3.ai/main?o=$HOST_IP:$NODE_PORT"
