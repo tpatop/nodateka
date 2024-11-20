@@ -42,6 +42,7 @@ clone_rep() {
     echo "Клонирование репозитория Ink node..."
     if [ -d "$ink_dir" ]; then
         echo "Репозиторий уже скачан. Пропуск клонирования."
+        exit 0
     else
         git clone https://github.com/inkonchain/node.git "$ink_dir" || {
             echo "Ошибка: не удалось клонировать репозиторий."
@@ -140,13 +141,11 @@ install_node() {
 
     # Запуск Docker Compose
     echo "Запуск ноды..."
-    docker compose up -d || {
-        echo "Перезапуск Docker Compose..."
-        docker compose down && docker compose up -d || {
-            echo "Ошибка при повторном запуске Docker Compose!"
-            exit 0
-        }
+    docker compose down && docker compose up -d || {
+        echo "Ошибка при запуске Docker Compose!"
+        exit 0
     }
+
     echo "Установка и запуск выполнены успешно!"
 }  # Закрытие функции install_node
 
