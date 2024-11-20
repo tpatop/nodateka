@@ -30,7 +30,7 @@ confirm() {
     esac
 }
 
-ink_dir="$HOME/node"
+ink_dir="$HOME/ink/node"
 
 # Функция для установки зависимостей
 install_dependencies() {
@@ -45,13 +45,13 @@ install_dependencies() {
 clone_rep() {
     echo "Клонирование репозитория Ink node..."
     git clone https://github.com/inkonchain/node.git "$ink_dir" || {
-        echo "Ошибка при клонировании репозитория!"
-        exit 1
+        echo "Репозиторий уже скачан."
     }
 }
 
 # Функция установки ноды
 install_node() {
+    mkdir ~/ink && ~/ink
     if confirm "Скачать репозиторий узла?"; then
         clone_rep
     else 
@@ -61,7 +61,6 @@ install_node() {
     echo "Переход в директорию узла..."
     cd "$ink_dir" || {
         echo "Ошибка: директория node не найдена!"
-        exit 1
     }
 
     # Массив с необходимыми портами
@@ -71,7 +70,6 @@ install_node() {
     for port in "${required_ports[@]}"; do
         if ss -tuln | grep -q ":$port "; then
             echo "Порт $port: ЗАНЯТ"
-            exit 1
         else
             echo "Порт $port: СВОБОДЕН"
         fi
@@ -92,7 +90,7 @@ install_node() {
         echo "Переменные успешно обновлены"
     else
         echo "Ошибка: файл $env_file не найден!"
-        exit 1
+        exit 0
     fi
 
     # Проверка и замена портов в docker-compose.yml
@@ -107,7 +105,7 @@ install_node() {
         echo "Порты успешно заменены."
     else
         echo "Ошибка: файл $compose_file не найден!"
-        exit 1
+        exit 0
     fi
 
     # Запуск скрипта установки
@@ -118,7 +116,7 @@ install_node() {
         rm -f *.tar.gz
     else
         echo "Ошибка: setup.sh не найден или не является исполняемым!"
-        exit 1
+        exit 0
     fi
 
     # Фикс проблемы с правами на доступ к директории
@@ -132,7 +130,7 @@ install_node() {
         echo "Перезапуск Docker Compose..."
         docker compose down && docker compose up -d || {
             echo "Ошибка при повторном запуске Docker Compose!"
-            exit 1
+            exit 0
         }
     }
     echo "Установка и запуск выполнены успешно!"
@@ -143,7 +141,7 @@ delete() {
     echo "Остановка и удаление контейнеров"
     cd "$ink_dir" && docker compose down 
     if confirm "Удалить директорию и все данные?"; then
-        cd ~ && rm -rf "$ink_dir"
+        cd ~ && rm -rf ~/ink
         echo "Успешно удалено." 
     else
         echo "Не удалено."
@@ -172,7 +170,7 @@ menu() {
             ;;
         2)  cd "$ink_dir" && docker compose logs -f --tail 20 ;;
         3)  curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' -H "Content-Type: application/json" http://localhost:8525 | jq ;;
-        4)  cd ~/node && docker compose ps -a ;;
+        4)  cd "$ink_dir" && docker compose ps -a ;;
         8)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
         9)  delete ;;
         0)  exit 0 ;;
