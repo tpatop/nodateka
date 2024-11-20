@@ -15,12 +15,19 @@ show_name() {
 # Функция для подтверждения действия
 confirm() {
     local prompt="$1"
-    read -p "$prompt [Y/n]: " choice
-    if [[ -z "$choice" || "$choice" == "y" ]]; then
-        return 0  # Выполнить действие
-    else
-        return 1  # Пропустить действие
-    fi
+    read -p "$prompt [y/n, Enter = yes]: " choice
+    case "$choice" in
+        ""|y|Y|yes|Yes)  # Пустой ввод или "да"
+            return 0  # Подтверждение действия
+            ;;
+        n|N|no|No)  # Любой вариант "нет"
+            return 1  # Отказ от действия
+            ;;
+        *)
+            echo "Пожалуйста, введите y или n."
+            confirm "$prompt"  # Повторный запрос, если ответ не распознан
+            ;;
+    esac
 }
 
 ink_dir="$HOME/node"
@@ -74,10 +81,10 @@ install_node() {
     env_file="$ink_dir/.env.ink-sepolia"
     if [ -f "$env_file" ]; then
         echo "Файл $env_file найден. Замена переменных..."
-        read -p "Введите URL для OP_NODE_L1_ETH_RPC [https://ethereum-sepolia-rpc.publicnode.com]: " input_rpc
+        read -p "Введите URL для OP_NODE_L1_ETH_RPC [Enter = https://ethereum-sepolia-rpc.publicnode.com]: " input_rpc
         OP_NODE_L1_ETH_RPC=${input_rpc:-https://ethereum-sepolia-rpc.publicnode.com}
 
-        read -p "Введите URL для OP_NODE_L1_BEACON [https://ethereum-sepolia-beacon-api.publicnode.com]: " input_beacon
+        read -p "Введите URL для OP_NODE_L1_BEACON [Enter = https://ethereum-sepolia-beacon-api.publicnode.com]: " input_beacon
         OP_NODE_L1_BEACON=${input_beacon:-https://ethereum-sepolia-beacon-api.publicnode.com}
 
         sed -i "s|^OP_NODE_L1_ETH_RPC=.*|OP_NODE_L1_ETH_RPC=$OP_NODE_L1_ETH_RPC|" "$env_file"
