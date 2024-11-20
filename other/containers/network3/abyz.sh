@@ -22,12 +22,21 @@ fi
 # Базовый порт
 BASE_PORT=21000
 
+# Массив для хранения имен узлов и их портов
+declare -A NODE_INFO
+
 # Цикл для запуска введенного количества узлов
 for i in $(seq 1 $NUM_NODES); do
     NODE_PORT=$((BASE_PORT + i))
     NODE_NAME="ubuntu-node-$i"
 
     echo "Запуск узла $NODE_NAME на порту $NODE_PORT..."
+
+    # Удаление существующего контейнера с таким именем
+    if docker ps -a --format '{{.Names}}' | grep -q "^$NODE_NAME$"; then
+        docker stop $NODE_NAME
+        docker rm $NODE_NAME
+    fi
 
     # Запуск контейнера с указанием нового порта
     docker run -d --name $NODE_NAME -p $NODE_PORT:8080  \
@@ -36,21 +45,30 @@ for i in $(seq 1 $NUM_NODES); do
         --restart=always \
         ubuntu-node:latest
 
-     # Выполнение команды ./manager.sh key внутри контейнера и получение ключа
+    # Сохранение информации об узле
+    NODE_INFO[$NODE_NAME]=$NODE_PORT
+
+    echo "Узел $NODE_NAME запущен."
+done
+
+echo "Все узлы запущены. Выполняется получение ключей..."
+
+# Обработка каждого контейнера для получения ключей и сохранения в файл
+for NODE_NAME in "${!NODE_INFO[@]}"; do
+    NODE_PORT=${NODE_INFO[$NODE_NAME]}
     NODE_KEY=$(docker exec $NODE_NAME bash -c "./manager.sh key" 2>/dev/null)
+
     if [ $? -ne 0 ]; then
         echo "Ошибка получения ключа для узла $NODE_NAME."
         continue
     fi
 
-    # Формирование строки с URL и ключом
     NODE_URL="https://account.network3.ai/main?o=$HOST_IP:$NODE_PORT"
-    OUTPUT_LINE="$NODE_URL ./manager.sh key: $NODE_KEY"
+    OUTPUT_LINE="$NODE_URL $NODE_KEY"
 
     # Сохранение строки в файл
     echo $OUTPUT_LINE >> $OUTPUT_FILE
-
-    echo "Узел $NODE_NAME запущен. Данные сохранены."
+    echo "Ключ для узла $NODE_NAME сохранен."
 done
 
-echo "Все узлы запущены. Данные сохранены в $OUTPUT_FILE."
+echo "Все данные сохранены в $OUTPUT_FILE."
