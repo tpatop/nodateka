@@ -157,7 +157,7 @@ install_node() {
         read -p "$(echo -e "${TERRACOTTA}${BOLD}Введите URL для L1_BEACON_URL ${NC}[Enter = https://ethereum-sepolia-beacon-api.publicnode.com]: ")" input_beacon
         L1_BEACON_URL=${input_beacon:-https://ethereum-sepolia-beacon-api.publicnode.com}
 
-        sed -i "s|^L1_RPC_URL=.*|L1_RPC_URL=$OP_NODE_L1_ETH_RPC|" "$env_file"
+        sed -i "s|^L1_RPC_URL=.*|L1_RPC_URL=$L1_RPC_URL|" "$env_file"
         sed -i "s|^L1_BEACON_URL=.*|L1_BEACON_URL=$L1_BEACON_URL|" "$env_file"
         show_bold "Переменные успешно обновлены"
         echo ''
