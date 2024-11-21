@@ -1,21 +1,58 @@
 #!/bin/bash
 
 # Логотип команды
-show_logotip() {
-    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+#show_logotip() {
+#    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+#}
+# Цвета для текста
+TERRACOTTA='\033[38;5;208m'
+LIGHT_BLUE='\033[38;5;117m'
+RED='\033[0;31m'
+BOLD='\033[1m'
+NC='\033[0m'
+PURPLE='\033[0;35m'
+
+# Функции для форматирования текста
+function show() {
+    echo -e "${TERRACOTTA}$1${NC}"
+}
+
+function show_bold() {
+    echo -en "${TERRACOTTA}${BOLD}$1${NC}"
+}
+
+function show_blue() {
+    echo -e "${LIGHT_BLUE}$1${NC}"
+}
+
+function show_war() {
+    echo -e "${RED}${BOLD}$1${NC}"
+}
+
+function show_purple() {
+    echo -e "${PURPLE}$1${NC}"
 }
 
 # Вывод названия узла
 show_name() {
-    echo ""
-    echo "INK chain node"
-    echo ""
+#    echo ""
+#    echo -e "\033[1;35mINK chain 11111111111node\033[0m"
+#    echo ""
+#}
+
+# ASCII-арт
+echo ""
+show_purple '░░░░░▀█▀░█▄░░█░█░▄▀░░░█▀▀█░█░░█░█▀▀█░▀█▀░█▄░░█░░░█▄░░█░█▀▀█░█▀▀▄░█▀▀▀░░░░░'
+show_purple '░░░░░░█░░█░█░█░█▀▄░░░░█░░░░█▀▀█░█▄▄█░░█░░█░█░█░░░█░█░█░█░░█░█░░█░█▀▀▀░░░░░'
+show_purple '░░░░░▄█▄░█░░▀█░█░░█░░░█▄▄█░█░░█░█░░█░▄█▄░█░░▀█░░░█░░▀█░█▄▄█░█▄▄▀░█▄▄▄░░░░░'
+echo ""
 }
 
 # Функция для подтверждения действия
 confirm() {
     local prompt="$1"
-    read -p "$prompt [y/n, Enter = yes]: " choice
+    echo -en "$prompt [y/n, Enter = yes]: "  # Выводим вопрос с цветом
+    read choice  # Читаем ввод пользователя
     case "$choice" in
         ""|y|Y|yes|Yes)  # Пустой ввод или "да"
             return 0  # Подтверждение действия
@@ -24,7 +61,7 @@ confirm() {
             return 1  # Отказ от действия
             ;;
         *)
-            echo "Пожалуйста, введите y или n."
+            show_war 'Пожалуйста, введите y или n.'
             confirm "$prompt"  # Повторный запрос, если ответ не распознан
             ;;
     esac
@@ -34,17 +71,22 @@ ink_dir="$HOME/ink/node"
 
 # Функция для установки зависимостей
 install_dependencies() {
-    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
-    sudo apt install jq net-tools -y
+    show_bold 'Установить необходимые пакеты и зависимости?'
+    if confirm ''; then
+        bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
+        sudo apt install jq net-tools
+    else
+        show_war 'Отменено.'
+    fi
 }
 
 clone_rep() {
-    echo "Клонирование репозитория Ink node..."
+    show 'Клонирование репозитория Ink node..'
     if [ -d "$ink_dir" ]; then
-        echo "Репозиторий уже скачан. Пропуск клонирования."
+        show "Репозиторий уже скачан. Пропуск клонирования."
     else
         git clone https://github.com/inkonchain/node.git "$ink_dir" || {
-            echo "Ошибка: не удалось клонировать репозиторий."
+            show_war 'Ошибка: не удалось клонировать репозиторий.'
             exit 0
         }
     fi
@@ -55,15 +97,15 @@ install_node() {
     mkdir -p ~/ink && cd ~/ink
     clone_rep
 
-    echo "Переход в директорию узла..."
+    show "Переход в директорию узла..."
     cd "$ink_dir" || {
-        echo "Ошибка: директория node не найдена!"
+        show_war "Ошибка: директория node не найдена!"
     }
    
     # Проверка и замена портов в docker-compose.yml
     compose_file="$ink_dir/docker-compose.yml"
     if [ -f "$compose_file" ]; then
-        echo "Файл $compose_file найден. Проверка и настройка портов..."
+        show "Файл $compose_file найден. Проверка и настройка портов..."
         docker compose down
         # Массив с портами и их назначением
         declare -A port_mapping=(
@@ -76,21 +118,21 @@ install_node() {
 
         for original_port in "${!port_mapping[@]}"; do
             new_port=${port_mapping[$original_port]}
-            echo "Проверка порта $new_port..."
+            show "Проверка порта $new_port..."
 
             # Если порт занят, запрос нового значения
             while ss -tuln | grep -q ":$new_port "; do
-                echo "Порт $new_port занят."
-                read -p "Введите новый порт для замены $original_port (текущий: $new_port): " user_port
+                show_war "Порт $new_port занят."
+                read -p "$(echo -e "${TERRACOTTA}${BOLD}Введите новый порт для замены $original_port (текущий: $new_port): ${NC}")" user_port
                 if [[ $user_port =~ ^[0-9]+$ && $user_port -ge 1 && $user_port -le 65535 ]]; then
                     if ss -tuln | grep -q ":$user_port "; then
-                        echo "Ошибка: введённый порт $user_port тоже занят. Попробуйте снова."
+                        show_war "Ошибка: введённый порт $user_port тоже занят. Попробуйте снова."
                     else
                         new_port=$user_port
                         break  # Выход из цикла, если порт свободен
                     fi
                 else
-                    echo "Некорректный ввод. Попробуйте снова."
+                    show_war "Некорректный ввод. Попробуйте снова."
                 fi
             done
 
@@ -100,37 +142,39 @@ install_node() {
                 export INK_RPC_PORT="$new_port"
                 echo "INK_RPC_PORT=$new_port" >> ~/.bashrc  # Сохранение в .bashrc для будущих сессий
             fi
-            echo "Настройка порта завершена."
+            show_bold "Настройка порта завершена."
+            echo ''
         done
     fi
 
     # Проверка и замена переменных в .env.ink-sepolia
     env_file="$ink_dir/.env.ink-sepolia"
     if [ -f "$env_file" ]; then
-        echo "Файл $env_file найден. Замена переменных..."
-        read -p "Введите URL для OP_NODE_L1_ETH_RPC [Enter = https://ethereum-sepolia-rpc.publicnode.com]: " input_rpc
-        OP_NODE_L1_ETH_RPC=${input_rpc:-https://ethereum-sepolia-rpc.publicnode.com}
+        show "Файл $env_file найден. Замена переменных..."
+        read -p "$(echo -e "${TERRACOTTA}${BOLD}Введите URL для L1_RPC_URL ${NC}[Enter = https://ethereum-sepolia-rpc.publicnode.com]: ")" input_rpc
+        L1_RPC_URL=${input_rpc:-https://ethereum-sepolia-rpc.publicnode.com}
 
-        read -p "Введите URL для OP_NODE_L1_BEACON [Enter = https://ethereum-sepolia-beacon-api.publicnode.com]: " input_beacon
-        OP_NODE_L1_BEACON=${input_beacon:-https://ethereum-sepolia-beacon-api.publicnode.com}
+        read -p "$(echo -e "${TERRACOTTA}${BOLD}Введите URL для L1_BEACON_URL ${NC}[Enter = https://ethereum-sepolia-beacon-api.publicnode.com]: ")" input_beacon
+        L1_BEACON_URL=${input_beacon:-https://ethereum-sepolia-beacon-api.publicnode.com}
 
-        sed -i "s|^OP_NODE_L1_ETH_RPC=.*|OP_NODE_L1_ETH_RPC=$OP_NODE_L1_ETH_RPC|" "$env_file"
-        sed -i "s|^OP_NODE_L1_BEACON=.*|OP_NODE_L1_BEACON=$OP_NODE_L1_BEACON|" "$env_file"
-        echo "Переменные успешно обновлены"
+        sed -i "s|^L1_RPC_URL=.*|L1_RPC_URL=$OP_NODE_L1_ETH_RPC|" "$env_file"
+        sed -i "s|^L1_BEACON_URL=.*|L1_BEACON_URL=$L1_BEACON_URL|" "$env_file"
+        show_bold "Переменные успешно обновлены"
+        echo ''
     else
-        echo "Ошибка: файл $env_file не найден!"
+        show_war "Ошибка: файл $env_file не найден!"
         exit 0
     fi
 
     # Запуск скрипта установки
     if [ -x "./setup.sh" ]; then
-        echo "Запускаю скрипт установки..."
+        show "Запускаю скрипт установки..."
         ./setup.sh
-        echo "Удаление архива снепшота"
+        show "Удаление архива снепшота"
         rm -f *.tar.gz
     else
-        echo "Ошибка: setup.sh не найден или не является исполняемым!"
-        exit 0
+        show_war "Ошибка: setup.sh не найден или не является исполняемым!"
+        exit 1
     fi
 
     # Фикс проблемы с правами на доступ к директории
@@ -139,39 +183,49 @@ install_node() {
     sudo chmod -R 755 "$ink_dir/geth"
 
     # Запуск Docker Compose
-    echo "Запуск ноды..."
+    show "Запуск ноды..."
     docker compose up -d || {
-        echo "Ошибка при запуске узла!"
-        exit 0
+        show "Перезапуск Docker Compose..."
+        docker compose down && docker compose up -d || {
+            show_war "Ошибка при повторном запуске Docker Compose!"
+            exit 1
+        }
     }
-
-    echo "Установка и запуск выполнены успешно!"
+    show_bold "Установка и запуск выполнены успешно!"
+    echo ''
 }
 
 # Удаление ноды
 delete() {
-    echo "Остановка и удаление контейнеров"
-    cd "$ink_dir" && docker compose down 
-    if confirm "Удалить директорию и все данные?"; then
+    show "Остановка и удаление контейнеров"
+    cd "$ink_dir" && docker compose down
+    show_bold 'Удалить директорию и все данные?'
+    if confirm ''; then
         cd ~ && rm -rf ~/ink
-        echo "Успешно удалено." 
+        show_bold "Успешно удалено." 
     else
-        echo "Не удалено."
+        show_war "Не удалено."
     fi
 }
 
 # Меню с командами
 show_menu() {
-    show_logotip
+   # show_logotip
     show_name
-    echo "Выберите действие:"
-    echo "1. Установить ноду"
-    echo "2. Просмотр логов ноды"
-    echo "3. Тестовый запрос к ноде"
-    echo "4. Проверка контейнеров"
-    echo "8. Вывод приватного ключа"
-    echo "9. Удаление ноды"
-    echo "0. Выход"
+    show_bold 'Выберите действие:'
+    echo ''
+    actions=(
+        "1. Установить ноду"
+        "2. Просмотр логов ноды"
+        "3. Тестовый запрос к ноде"
+        "4. Проверка контейнеров"
+        "8. Вывод приватного ключа"
+        "9. Удаление ноды"
+        "0. Выход"
+    )
+    for action in "${actions[@]}"; do
+        show "$action"
+    done
 }
 
 menu() {
@@ -184,7 +238,7 @@ menu() {
         3)  
             : "${INK_RPC_PORT:=8525}"
             if ! command -v jq &>/dev/null; then
-                echo "Ошибка: jq не установлен. Установите его с помощью: sudo apt install jq"
+                show_war 'Ошибка: jq не установлен. Установите его с помощью: sudo apt install jq'
                 exit 1
             fi
             if curl -s http://localhost:"$INK_RPC_PORT" &>/dev/null; then
@@ -192,23 +246,26 @@ menu() {
                      -H "Content-Type: application/json" \
                      http://localhost:"$INK_RPC_PORT" | jq
             else
-                echo "Ошибка: RPC на порту $INK_RPC_PORT недоступен. Проверьте, запущен ли узел."
+                show_war 'Ошибка: RPC на порту $INK_RPC_PORT недоступен. Проверьте, запущен ли узел.'
             fi ;;
         4)  
             if [ -d "$ink_dir" ]; then
                 cd "$ink_dir" && docker compose ps -a
             else
-                echo "Ошибка: директория $ink_dir не найдена."
+                show_war 'Ошибка: директория $ink_dir не найдена.'
             fi ;;
         8)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
         9)  delete ;;
-        0)  exit 0 ;;
-        *)  echo "Неверный выбор, попробуйте снова." ;;
+        0)  
+            echo -en "${TERRACOTTA}${BOLD}Присоединяйся к Нодатеке, будем ставить ноды вместе! ${NC}${LIGHT_BLUE}https://t.me/cryptotesemnikov/778${NC}\n"
+            exit 0 ;;
+        *)  show_war "Неверный выбор, попробуйте снова." ;;
     esac
 }
 
 while true; do
     show_menu
-    read -p "Ваш выбор: " choice
+    show_bold 'Ваш выбор:'
+    read choice
     menu "$choice"
 done
