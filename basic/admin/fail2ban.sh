@@ -4,6 +4,8 @@
 # Логотип команды
 bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
 
+JAIL_LOCAL="/etc/fail2ban/jail.local"
+
 # Функция установки Fail2ban
 install_fail2ban() {
     # Установка и настройка логирования, если отсутствует
@@ -23,10 +25,8 @@ install_fail2ban() {
 
 # Функция для создания конфигурационного файла джейла SSH
 create_jail_local() {
-    local jail_local="/etc/fail2ban/jail.local"
-    echo -e "\n📁 Создание конфигурационного файла $jail_local..."
-
-    cat <<EOL > $jail_local
+    echo -e "\n📁 Создание конфигурационного файла $JAIL_LOCAL..."
+    cat <<EOL > $JAIL_LOCAL
 [sshd]
 enabled = true
 port = ssh
@@ -101,9 +101,9 @@ check_jail_status() {
 
 # Функция изменения параметров конфигурации
 change_settings() {
-    local jail_local="/etc/fail2ban/jail.local"
+
     echo -e "\n⚙️ Изменение настроек джейла sshd:"
-    
+
     # Запрос значений у пользователя с указанием значений по умолчанию
     read -rp "Введите количество попыток перед блокировкой (maxretry) [3]: " maxretry
     read -rp "Введите время отслеживания (findtime, в секундах) [3600]: " findtime
@@ -115,11 +115,11 @@ change_settings() {
     bantime="${bantime:--1}"  # Постоянная блокировка по умолчанию
 
     # Применение изменений в jail.local
-    sed -i "/maxretry/c\maxretry = $maxretry" "$jail_local"
-    sed -i "/findtime/c\findtime = $findtime" "$jail_local"
-    sed -i "/bantime/c\bantime = $bantime" "$jail_local"
+    sed -i "/maxretry/c\maxretry = $maxretry" "$JAIL_LOCAL"
+    sed -i "/findtime/c\findtime = $findtime" "$JAIL_LOCAL"
+    sed -i "/bantime/c\bantime = $bantime" "$JAIL_LOCAL"
 
-    echo -e "\n✅ Новые параметры сохранены в $jail_local:"
+    echo -e "\n✅ Новые параметры сохранены в $JAIL_LOCAL:"
     echo "maxretry = $maxretry, findtime = $findtime, bantime = $bantime"
 
     restart_fail2ban
