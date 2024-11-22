@@ -74,27 +74,43 @@ clone_repository() {
     cd infernet-container-starter || exit
 }
 
+# Функция для изменений настроек
+change_settings() {
+    # Получение данных
+    read -p "Введите значение sleep [3]: " SLEEP
+    SLEEP=${SLEEP:-3}
+    read -p "Введите значение trail_head_blocks [1]: " TRAIL_HEAD_BLOCKS
+    TRAIL_HEAD_BLOCKS=${TRAIL_HEAD_BLOCKS:-1}
+    read -p "Введите значение batch_size [1800]: " BATCH_SIZE
+    BATCH_SIZE=${BATCH_SIZE:-1800}
+    read -p "Введите значение starting_sub_id [180000]: " STARTING_SUB_ID
+    STARTING_SUB_ID=${STARTING_SUB_ID:-180000}
+
+    # Внесение изменений
+    sed -i "s|\"sleep\":.*|\"sleep\": $SLEEP,|" "$HELLO_CONFIG_PATH"
+    sed -i "s|\"batch_size\":.*|\"batch_size\": $BATCH_SIZE,|" "$HELLO_CONFIG_PATH"
+    sed -i "s|\"starting_sub_id\":.*|\"starting_sub_id\": $STARTING_SUB_ID,|" "$HELLO_CONFIG_PATH"
+    sed -i "s|\"trail_head_blocks\":.*|\"trail_head_blocks\": $TRAIL_HEAD_BLOCKS,|" "$HELLO_CONFIG_PATH"
+
+}
+
+
 # Функция для настройки конфигурационных файлов
 configure_files() {
     if confirm "Настроить файлы конфигурации?"; then
         echo "Настройка файлов конфигурации..."
-
-        # Параметры с пользовательским вводом
-        read -p "Введите ваш private_key (c 0x): " PRIVATE_KEY
-        read -p "Введите значение sleep [3]: " SLEEP
-        SLEEP=${SLEEP:-3}
-        read -p "Введите значение batch_size [1800]: " BATCH_SIZE
-        BATCH_SIZE=${BATCH_SIZE:-1800}
-        read -p "Введите значение starting_sub_id [180000]: " STARTING_SUB_ID
-        STARTING_SUB_ID=${STARTING_SUB_ID:-180000}
-        read -p "Введите адрес RPC [https://mainnet.base.org]: " RPC_URL
-        RPC_URL=${RPC_URL:-https://mainnet.base.org}
 
         # Резервное копирование файлов
         cp "$HELLO_CONFIG_PATH" "${HELLO_CONFIG_PATH}.bak"
         cp "$DEPLOY_SCRIPT_PATH" "${DEPLOY_SCRIPT_PATH}.bak"
         cp "$MAKEFILE_PATH" "${MAKEFILE_PATH}.bak"
         cp "$DOCKER_COMPOSE_PATH" "${DOCKER_COMPOSE_PATH}.bak"
+
+        # Параметры с пользовательским вводом
+        read -p "Введите ваш private_key (c 0x): " PRIVATE_KEY
+        read -p "Введите адрес RPC [https://mainnet.base.org]: " RPC_URL
+        RPC_URL=${RPC_URL:-https://mainnet.base.org}
+        change_settings
 
         # Изменения в файле конфигурации
         sed -i 's|4000,|5000,|' "$HELLO_CONFIG_PATH"
@@ -103,14 +119,10 @@ configure_files() {
         else
             echo "Занятый порт 3000 будет изменен на 4998. Учтите это при проверках."
             sed -i 's|"3000"|"4998"|' "$HELLO_CONFIG_PATH"
-            # sed -i 's|:3000|:4998|' "$HELLO_CONFIG_PATH"
         fi
-        sed -i "s|\"rpc_url\":.*|\"rpc_url\": \"$RPC_URL\",|" "$HELLO_CONFIG_PATH"
         sed -i "s|\"registry_address\":.*|\"registry_address\": \"0x3B1554f346DFe5c482Bb4BA31b880c1C18412170\",|" "$HELLO_CONFIG_PATH"
         sed -i "s|\"private_key\":.*|\"private_key\": \"$PRIVATE_KEY\",|" "$HELLO_CONFIG_PATH"
-        sed -i "s|\"sleep\":.*|\"sleep\": $SLEEP,|" "$HELLO_CONFIG_PATH"
-        sed -i "s|\"batch_size\":.*|\"batch_size\": $BATCH_SIZE,|" "$HELLO_CONFIG_PATH"
-        sed -i "s|\"starting_sub_id\":.*|\"starting_sub_id\": $STARTING_SUB_ID,|" "$HELLO_CONFIG_PATH"
+        sed -i "s|\"rpc_url\":.*|\"rpc_url\": \"$RPC_URL\",|" "$HELLO_CONFIG_PATH"
 
         # Изменения в deploy-скрипте и Makefile
         sed -i "s|address registry =.*|address registry = 0x3B1554f346DFe5c482Bb4BA31b880c1C18412170;|" "$DEPLOY_SCRIPT_PATH"
@@ -131,6 +143,12 @@ configure_files() {
 # Функция для запуска screen сессии
 start_screen_session() {
     if confirm "Запустить screen сессию 'ritual'?"; then
+        # Проверяем наличие сессии с именем 'ritual'
+        if screen -list | grep -q "ritual"; then
+            echo "Найдена предыдущая сессия 'ritual'. Удаляем..."
+            screen -S ritual -X quit
+        fi
+
         echo "Запуск screen сессии 'ritual'..."
         screen -S ritual -d -m bash -c "project=hello-world make deploy-container; bash"
         echo "Открыто новое окно screen."
@@ -139,14 +157,14 @@ start_screen_session() {
     fi
 }
 
-# Функция для перезапуска Docker контейнеров
-restart_docker_containers() {
+# Перезапуск проекта
+restart_node() {
     if confirm "Перезапустить Docker контейнеры?"; then
-        echo "Перезапуск Docker контейнеров..."
-        cd /root && docker compose -f $DOCKER_COMPOSE_PATH down
-        docker compose -f $DOCKER_COMPOSE_PATH up -d
+        echo "Перезапуск контейнеров..."
+        docker compose -f $DOCKER_COMPOSE_PATH down
+        docker compose -f $DOCKER_COMPOSE_PATH up -d 
     else
-        echo "Пропущен перезапуск Docker контейнеров."
+        echo "Перезапуск контейнеров отменен."
     fi
 }
 
@@ -240,7 +258,7 @@ replace_rpc_url() {
             echo "Не удалось найти ни одного конфигурационного файла для замены RPC URL."
             return  # Завершаем выполнение функции
         fi
-        restart_docker_containers
+        restart_node
         echo "Контейнеры перезапущены после замены RPC URL."
     else
         echo "Замена RPC URL отменена."
@@ -250,11 +268,19 @@ replace_rpc_url() {
 # Функция для удаления ноды
 delete_node() {
     if confirm "Удалить ноду и очистить файлы?"; then
+        cd ~
         echo "Остановка и удаление контейнеров"
-        cd ~ 
         docker compose -f $DOCKER_COMPOSE_PATH down
+
+        # Завершение screen сессии
+        if screen -list | grep -q "ritual"; then
+            echo "Завершаем screen сессию 'ritual'..."
+            screen -S ritual -X quit
+        fi
+
         echo "Удаление директории проекта"
-        rm -rf infernet-container-starter
+        rm -rf ~/infernet-container-starter
+        
         echo "Удаление образов проекта, хранилищ..."
         docker system prune -a
         echo "Нода удалена и файлы очищены."
@@ -290,9 +316,12 @@ show_menu() {
     echo ""
     echo "Выберите действие:"
     echo "1. Установка ноды"
-    echo "2. Логи ноды"
+    echo "2. Смена базовых настроек"
     echo "3. Замена RPC"
-    echo "8. Информация о проекте"
+    echo "4. Логи ноды"
+    echo "5. Статус контейнеров"
+    echo "7. Информация о проекте"
+    echo "8. Перезагрузка контейнеров"
     echo "9. Удаление ноды"
     echo "0. Выход"
 }
@@ -312,15 +341,21 @@ handle_choice() {
             call_contract
             ;;
         2)
-            echo "Отображение логов ноды..."
-            docker logs -f --tail 20 infernet-node
-            ;;
+            change_settings
+            restart_node
         3)
             echo "Замена RPC URL..."
             replace_rpc_url
             ;;
-        8)
+        4)
+            echo "Отображение логов ноды..."
+            docker logs -f --tail 20 infernet-node
+            ;;
+        7)
             show_project_info
+            ;;
+        8)  
+            restart_node
             ;;
         9)
             echo "Удаление ноды..."
@@ -340,5 +375,6 @@ while true; do
     show_logotip
     show_menu
     read -p "Ваш выбор: " action
-    handle_choice "$action"  # Используем переменную action
+    handle_choice "$action"
+    echo ""
 done
