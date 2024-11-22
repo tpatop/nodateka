@@ -351,6 +351,9 @@ handle_choice() {
             echo "Отображение логов ноды..."
             docker logs -f --tail 20 infernet-node
             ;;
+        5)
+            docker ps -a |grep infernet
+            ;;
         7)
             show_project_info
             ;;
