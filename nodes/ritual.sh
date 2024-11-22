@@ -343,6 +343,7 @@ handle_choice() {
         2)
             change_settings
             restart_node
+            ;;
         3)
             echo "Замена RPC URL..."
             replace_rpc_url
