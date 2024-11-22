@@ -342,6 +342,7 @@ handle_choice() {
             ;;
         2)
             change_settings
+            cp "$HELLO_CONFIG_PATH" "$CONFIG_PATH"
             restart_node
             ;;
         3)
