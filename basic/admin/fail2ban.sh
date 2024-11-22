@@ -52,9 +52,50 @@ restart_fail2ban() {
     fi
 }
 
+# Функция просмотра списка ignoreip
+view_ignore_ip() {
+    echo "📋 Текущий список исключений (ignoreip):"
+    grep -oP '(?<=ignoreip = ).*' "$JAIL_LOCAL"
+}
+
+# Функция добавления IP в ignoreip
+add_ignore_ip() {
+    local ip
+    view_ignore_ip
+    read -rp "Введите IP-адрес для добавления в исключения: " ip
+
+    if grep -q "ignoreip" "$JAIL_LOCAL"; then
+        if grep -q "ignoreip.*$ip" "$JAIL_LOCAL"; then
+            echo "⚠️ IP-адрес $ip уже есть в списке исключений."
+        else
+            sed -i "/ignoreip/c\ignoreip = $(grep -oP '(?<=ignoreip = ).*' $JAIL_LOCAL) $ip" "$JAIL_LOCAL"
+            echo "✅ IP-адрес $ip добавлен в список исключений."
+        fi
+    else
+        echo "ignoreip = $ip" >> "$JAIL_LOCAL"
+        echo "✅ Добавлено поле ignoreip с IP-адресом $ip."
+    fi
+
+    restart_fail2ban
+}
+
+# Функция удаления IP из ignoreip
+remove_ignore_ip() {
+    local ip
+    view_ignore_ip
+    read -rp "Введите IP-адрес для удаления из исключений: " ip
+    if grep -q "ignoreip.*$ip" "$JAIL_LOCAL"; then
+        sed -i "/ignoreip/c\ignoreip = $(grep -oP '(?<=ignoreip = ).*' $JAIL_LOCAL | sed "s/\b$ip\b//g" | xargs)" "$JAIL_LOCAL"
+        echo "✅ IP-адрес $ip удален из списка исключений."
+        restart_fail2ban
+    else
+        echo "⚠️ IP-адрес $ip не найден в списке исключений."
+    fi
+}
+
 # Функция проверки статуса джейла sshd
 check_jail_status() {
-    echo -e "\nℹ️ Проверка статуса джейла sshd..."
+    echo -e "\nℹ️ Проверка статуса jail sshd..."
     fail2ban-client status sshd
 }
 
@@ -84,6 +125,19 @@ change_settings() {
     restart_fail2ban
 }
 
+# Функция удаления IP из заблокированных
+unban_ip() {
+    local ip
+    read -rp "Введите IP-адрес для разблокировки: " ip
+
+    echo "🔍 Проверка и разблокировка IP $ip..."
+    if fail2ban-client status sshd | grep -q "$ip"; then
+        fail2ban-client unban "$ip"
+        echo "✅ IP-адрес $ip успешно разблокирован."
+    else
+        echo "⚠️ IP-адрес $ip не найден в списке заблокированных."
+    fi
+}
 
 # Функция меню
 show_menu() {
@@ -91,9 +145,13 @@ show_menu() {
     echo "    Выберите действие:"
     echo "==============================="
     echo "1. 🛠 Установка Fail2ban"
-    echo "2. 📊 Проверка статуса джейла sshd"
-    echo "3. ⚙️ Изменение настроек (maxretry, findtime, bantime)"
-    echo "4. 🔍 Просмотр успешных попыток входа"
+    echo "2. ⚙️ Изменение настроек блокировки"
+    echo "3. 🔓 Разблокировка IP адреса"
+    echo "4. ➕ Добавить IP в список исключения"
+    echo "5. ➖ Удалить IP из списка исключений"
+    echo "6. 📋 Просмотр списка исключений"
+    echo "8. 📊 Проверка статуса jail sshd"
+    echo "9. 🔍 Просмотр успешных попыток входа"
     echo "0. 🚪 Выход"
     echo "==============================="
     read -rp "Ваш выбор: " choice
@@ -104,12 +162,24 @@ show_menu() {
             restart_fail2ban
             ;;
         2)
-            check_jail_status
-            ;;
-        3)
             change_settings
             ;;
-        4) 
+        3) 
+            unban_ip
+            ;;
+        4)
+            add_ignore_ip
+            ;;
+        5)
+            remove_ignore_ip
+            ;;
+        6)
+            view_ignore_ip
+            ;;
+        8)
+            check_jail_status
+            ;;
+        9) 
             sudo grep "Accepted password" /var/log/auth.log
             ;;
         0)
