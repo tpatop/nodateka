@@ -75,7 +75,6 @@ add_ignore_ip() {
         echo "ignoreip = $ip" >> "$JAIL_LOCAL"
         echo "✅ Добавлено поле ignoreip с IP-адресом $ip."
     fi
-
     restart_fail2ban
 }
 
@@ -155,6 +154,7 @@ show_menu() {
     echo "0. 🚪 Выход"
     echo "==============================="
     read -rp "Ваш выбор: " choice
+    echo ""
     case $choice in
         1)
             install_fail2ban
