@@ -119,6 +119,8 @@ if [ -z "$RPC_URLS" ] || [ -z "$REORG_PERIOD" ]; then
     exit 1
 fi
 
+rm "$YAML_FILE"
+
 # Проверка и замена порта, если он занят
 DEFAULT_PORT=9090
 HOST_PORT=9091
