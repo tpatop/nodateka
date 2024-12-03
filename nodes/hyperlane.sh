@@ -9,6 +9,8 @@ save_to_bashrc() {
     echo "$var_name сохранён в .bashrc"
 }
 
+source ~/.bashrc
+
 # Проверка и запрос HYPERLANE_PRIVATE_KEY
 if [ -z "$HYPERLANE_PRIVATE_KEY" ]; then
     echo "Переменная HYPERLANE_PRIVATE_KEY не установлена."
