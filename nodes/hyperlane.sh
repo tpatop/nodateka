@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Вывод логотипа
+bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+
 # Функция для сохранения переменной в .bashrc
 save_to_bashrc() {
     local var_name="$1"
