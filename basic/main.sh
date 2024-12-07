@@ -58,7 +58,7 @@ show_node_list() {
     echo -e "1. Elixir (mainnet/testnet)"
     echo -e "2. Unichain"
     echo -e "3. Ritual"
-    echo -e "4. Ora (перезапуск)"
+    echo -e "4. Hyperlane"
     echo -e "5. INK"
     echo "0. Выход"
 }
@@ -69,7 +69,7 @@ node_menu() {
         1) bash <(curl -s ${BASE_URL}/elixir.sh) ;;
         2) bash <(curl -s ${BASE_URL}/unichain.sh) ;;
         3) bash <(curl -s ${BASE_URL}/ritual.sh) ;;   
-        4) bash <(curl -s ${BASE_URL}/ora-crontab.sh) ;; 
+        4) bash <(curl -s ${BASE_URL}/hyperlane.sh) ;;
         5) bash <(curl -s ${BASE_URL}/inkochain.sh) ;; 
         0) echo "Выход."; exit 0 ;;
         *) echo "Неверный выбор. Попробуйте снова." ;;
@@ -92,7 +92,7 @@ show_menu() {
     echo "2. Установка Fail2ban"
     echo "3. Установка автоудаления логов"
     echo "4. Экспресс очистка памяти"
-    echo "9. Список скриптов установки/настройки нод"
+    echo "9. Ноды (скрипты)"
     echo "0. Выход"
 }
 
