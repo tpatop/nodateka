@@ -12,20 +12,59 @@ save_to_bashrc() {
     echo "$var_name сохранён в .bashrc"
 }
 
+# Группировка сетей по типу
+declare -A NETWORK_TYPES
+NETWORK_TYPES["EVM"]="abstracttestnet alephzeroevmmainnet alephzeroevmtestnet alfajores \
+    ancient8 apechain arbitrum arbitrumnova arbitrumsepolia artelatestnet arthera artheratestnet \
+    astar astarzkevm avalanche blast blastsepolia boba bobabnb bobabnbtestnet bsc bsctestnet \
+    canto cantotestnet celo confluxespace cronos cronoszkevm dogechain duckchain eclipsemainnet \
+    eclipsetestnet ethereum flare harmony harmonytestnet immutablezkevmmainnet kalychain kroma \
+    linea lisk lukso mantle metal metis mode moonbeam moonriver optimism polygon polygonzkevm \
+    scroll shibarium taiko treasuretopaz zoramainnet"
+NETWORK_TYPES["SOLANA"]="solanadevnet solanamainnet solanatestnet"
+NETWORK_TYPES["COSMOS"]="cosmoshub injective neutron osmosis sei stride"
+
+# Выбор типа сети
+echo "Выберите тип сети:"
+select NETWORK_TYPE in "${!NETWORK_TYPES[@]}"; do
+    if [[ -n "$NETWORK_TYPE" ]]; then
+        echo "Вы выбрали тип сети: $NETWORK_TYPE"
+        break
+    else
+        echo "Неверный выбор. Попробуйте снова."
+    fi
+done
+
+# Получаем список сетей для выбранного типа
+AVAILABLE_NETWORKS=(${NETWORK_TYPES["$NETWORK_TYPE"]})
+
+# Выбор конкретной сети
+echo "Выберите сеть из списка:"
+select TARGET_CHAIN in "${AVAILABLE_NETWORKS[@]}"; do
+    if [[ -n "$TARGET_CHAIN" ]]; then
+        echo "Вы выбрали сеть: $TARGET_CHAIN"
+        break
+    else
+        echo "Неверный выбор. Попробуйте снова."
+    fi
+done
+
+# Загрузка переменных из .bashrc
 source ~/.bashrc
 
 # Проверка и запрос HYPERLANE_PRIVATE_KEY
-if [ -z "$HYPERLANE_PRIVATE_KEY" ]; then
-    echo "Переменная HYPERLANE_PRIVATE_KEY не установлена."
-    read -p "Введите значение для HYPERLANE_PRIVATE_KEY: " input_key
+KEY_VAR="HYPERLANE_PRIVATE_KEY_${NETWORK_TYPE}"
+if [ -z "${!KEY_VAR}" ]; then
+    echo "Переменная $KEY_VAR не установлена."
+    read -p "Введите значение для $KEY_VAR: " input_key
     if [ -z "$input_key" ]; then
-        echo "Ошибка: HYPERLANE_PRIVATE_KEY не может быть пустым."
+        echo "Ошибка: $KEY_VAR не может быть пустым."
         exit 1
     fi
-    export HYPERLANE_PRIVATE_KEY="$input_key"
-    save_to_bashrc "HYPERLANE_PRIVATE_KEY" "$input_key"
+    export $KEY_VAR="$input_key"
+    save_to_bashrc "$KEY_VAR" "$input_key"
 else
-    echo "HYPERLANE_PRIVATE_KEY загружен из окружения."
+    echo "$KEY_VAR загружен из окружения."
 fi
 
 # Проверка и запрос HYPERLANE_VALIDATOR_NAME
@@ -46,42 +85,9 @@ fi
 source ~/.bashrc
 
 echo "Все переменные окружения успешно загружены:"
-echo "HYPERLANE_PRIVATE_KEY=$HYPERLANE_PRIVATE_KEY"
+echo "$KEY_VAR=${!KEY_VAR}"
 echo "HYPERLANE_VALIDATOR_NAME=$HYPERLANE_VALIDATOR_NAME"
 
-# Список доступных сетей
-NETWORKS=(
-    abstracttestnet alephzeroevmmainnet alephzeroevmtestnet alfajores ancient8 apechain arbitrum arbitrumnova arbitrumsepolia
-    arcadiatestnet2 artelatestnet arthera artheratestnet astar astarzkevm auroratestnet avalanche b3 base basesepolia
-    berabartio bitlayer blast blastsepolia bob boba bobabnb bobabnbtestnet bsc bsctestnet bsquared camptestnet canto
-    cantotestnet carbon celo cheesechain chilizmainnet citreatestnet clique confluxespace connextsepolia coredao cosmoshub
-    cronos cronoszkevm cyber deepbrainchaintestnet degenchain deprecatedalephzeroevm deprecatedchiliz deprecatedflow
-    deprecatedimmutablezkevm deprecatedmetall2 deprecatedpolynomial deprecatedrari deprecatedrootstock deprecatedsuperposition
-    dodotestnet dogechain duckchain ebi eclipsemainnet eclipsetestnet ecotestnet endurance ethereum euphoriatestnet everclear
-    fantom fhenixtestnet filecoin flame flare flowmainnet forma formtestnet fractalconfluence fraxtal fraxtaltestnet fuji funki
-    fusemainnet galadrieldevnet gnosis gravity ham harmony harmonytestnet heneztestnet holesky humanitytestnet
-    hyperliquidevmtestnet immutablezkevmmainnet inevm injective inksepolia kaia kalychain kava kinto koitestnet kroma linea
-    lisk lisksepolia lukso luksotestnet lumia lumiaprism mantapacific mantapacifictestnet mantle mantlesepolia merlin metal
-    metall2testnet metertestnet metis mevmdevnet mint mintsepoliatest mode modetestnet molten moonbase moonbeam moonriver
-    morph nautilus neoxt4 neutron odysseytestnet oortmainnet opbnb opbnbtestnet optimism optimismsepolia orderly osmosis
-    piccadilly plumetestnet polygon polygonamoy polygonzkevm polynomialfi prom proofofplay pulsechain rarichain
-    reactivekopli real redstone ronin rootstockmainnet rootstocktestnet saakuru sanko scroll scrollsepolia sei sepolia
-    shibarium sketchpad smartbch snaxchain solanadevnet solanamainnet solanatestnet soneiumtestnet sonictestnet sophonsepolia
-    storyodysseytestnet storytestnet stride stridetestnet suavetoliman superpositionmainnet superpositiontestnet superseed
-    superseedtestnet swell taiko taikohekla tangle tangletestnet tenet treasuretopaz u2utestnet unichain unichaintestnet
-    vana viction wanchaintestnet worldchain xai xlayer zeronetwork zetachain zircuit zksync zksyncsepolia zoramainnet
-    zoratestnet
-)
-
-echo "Выберите сеть из списка:"
-select TARGET_CHAIN in "${NETWORKS[@]}"; do
-    if [[ -n "$TARGET_CHAIN" ]]; then
-        echo "Вы выбрали сеть: $TARGET_CHAIN"
-        break
-    else
-        echo "Неверный выбор. Попробуйте снова."
-    fi
-done
 
 # Создание базовой директории
 mkdir -p ~/hyperlane && cd ~/hyperlane
@@ -155,8 +161,8 @@ docker run -d -it \
     --checkpointSyncer.type localStorage \
     --checkpointSyncer.folder "$TARGET_CHAIN" \
     --checkpointSyncer.path /hyperlane_db/checkpoints \
-    --validator.key "$HYPERLANE_PRIVATE_KEY" \
-    --chains."$TARGET_CHAIN".signer.key "$HYPERLANE_PRIVATE_KEY" \
+    --validator.key "${!KEY_VAR}" \
+    --chains."$TARGET_CHAIN".signer.key "${!KEY_VAR}" \
     --chains."$TARGET_CHAIN".customRpcUrls "$RPC_URLS"
 
 echo "Docker container $DOCKER_NAME started on port $HOST_PORT"
