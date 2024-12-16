@@ -71,7 +71,9 @@ show_logs() {
 show_private_key() {
   echo "Вывод приватного ключа..."
   if [ -f ~/unichain-node/geth-data/geth/nodekey ]; then
+    echo ''
     cat ~/unichain-node/geth-data/geth/nodekey
+    echo ''
   else
     echo "Приватный ключ не найден!"
   fi
@@ -89,7 +91,8 @@ delete_node() {
 
 # Функция для отображения меню
 show_menu() {
-  echo "Меню управления нодой:"
+  echo ""
+  echo "Выберите действие:"
   echo "1. Установка ноды"
   echo "2. Обновление узла (18.12.2024)"
   echo "3. Тестовый запрос"
@@ -103,7 +106,7 @@ show_menu() {
 while true; do
   bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
   show_menu
-  read -rp "Выберите действие: " choice
+  read -p "Ваш выбор: " choice
   case $choice in
     1) install_node ;;
     2) update_node ;;
