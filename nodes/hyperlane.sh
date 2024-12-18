@@ -51,27 +51,31 @@ echo "HYPERLANE_VALIDATOR_NAME=$HYPERLANE_VALIDATOR_NAME"
 
 # Список доступных сетей
 NETWORKS=(
-    abstracttestnet alephzeroevmmainnet alephzeroevmtestnet alfajores ancient8 apechain arbitrum arbitrumnova arbitrumsepolia
-    arcadiatestnet2 artelatestnet arthera artheratestnet astar astarzkevm auroratestnet avalanche b3 base basesepolia
-    berabartio bitlayer blast blastsepolia bob boba bobabnb bobabnbtestnet bsc bsctestnet bsquared camptestnet canto
-    cantotestnet carbon celo cheesechain chilizmainnet citreatestnet clique confluxespace connextsepolia coredao cosmoshub
-    cronos cronoszkevm cyber deepbrainchaintestnet degenchain deprecatedalephzeroevm deprecatedchiliz deprecatedflow
-    deprecatedimmutablezkevm deprecatedmetall2 deprecatedpolynomial deprecatedrari deprecatedrootstock deprecatedsuperposition
-    dodotestnet dogechain duckchain ebi eclipsemainnet eclipsetestnet ecotestnet endurance ethereum euphoriatestnet everclear
-    fantom fhenixtestnet filecoin flame flare flowmainnet forma formtestnet fractalconfluence fraxtal fraxtaltestnet fuji funki
-    fusemainnet galadrieldevnet gnosis gravity ham harmony harmonytestnet heneztestnet holesky humanitytestnet
-    hyperliquidevmtestnet immutablezkevmmainnet inevm injective inksepolia kaia kalychain kava kinto koitestnet kroma linea
-    lisk lisksepolia lukso luksotestnet lumia lumiaprism mantapacific mantapacifictestnet mantle mantlesepolia merlin metal
-    metall2testnet metertestnet metis mevmdevnet mint mintsepoliatest mode modetestnet molten moonbase moonbeam moonriver
-    morph nautilus neoxt4 neutron odysseytestnet oortmainnet opbnb opbnbtestnet optimism optimismsepolia orderly osmosis
-    piccadilly plumetestnet polygon polygonamoy polygonzkevm polynomialfi prom proofofplay pulsechain rarichain
-    reactivekopli real redstone ronin rootstockmainnet rootstocktestnet saakuru sanko scroll scrollsepolia sei sepolia
-    shibarium sketchpad smartbch snaxchain solanadevnet solanamainnet solanatestnet soneiumtestnet sonictestnet sophonsepolia
-    storyodysseytestnet storytestnet stride stridetestnet suavetoliman superpositionmainnet superpositiontestnet superseed
-    superseedtestnet swell taiko taikohekla tangle tangletestnet tenet treasuretopaz u2utestnet unichain unichaintestnet
-    vana viction wanchaintestnet worldchain xai xlayer zeronetwork zetachain zircuit zksync zksyncsepolia zoramainnet
-    zoratestnet
+  abstracttestnet alephzeroevmmainnet alephzeroevmtestnet alfajores ancient8 apechain
+  appchain arbitrum arbitrumnova arbitrumsepolia arcadiatestnet2 argochaintestnet
+  artelatestnet arthera artheratestnet astar astarzkevm aurora auroratestnet avalanche
+  b3 base basesepolia berabartio bitlayer blast blastsepolia bob boba bobabnb
+  bobabnbtestnet bsc bsctestnet bsquared camptestnet canto cantotestnet carbon celo
+  cheesechain chilizmainnet citreatestnet clique conflux connextsepolia conwai coredao
+  corn cosmoshub cronos cronoszkevm cyber deepbrainchaintestnet degenchain deprecatedalephzeroevm
+  deprecatedchiliz deprecatedflow deprecatedimmutablezkevm deprecatedmetall2 deprecatedpolynomial
+  deprecatedrari deprecatedrootstock deprecatedsuperposition dodotestnet dogechain duckchain ebi
+  echos eclipsemainnet eclipsetestnet ecotestnet endurance ethereum euphoriatestnet everclear evmos
+  fantom fhenixtestnet filecoin flame flare flowmainnet form forma formtestnet fractal
+  fraxtal fraxtaltestnet fuji funki fusemainnet galadrieldevnet gnosis gnosischiadotestnet gravity
+  ham harmony harmonytestnet heneztestnet holesky humanitytestnet hyperliquidevmtestnet
+  immutablezkevmmainnet inclusivelayertestnet inevm injective ink inksepolia kaia kalychain
+  kava kinto koitestnet kroma linea lineasepolia lisk lisksepolia lukso luksotestnet lumia lumiaprism
+  mantapacific mantapacifictestnet mantle mantlesepolia merlin metal metall2testnet metertestnet
+  metis mevmdevnet mint mintsepoliatest mitosistestnet mode modetestnet molten moonbase moonbeam
+  moonriver morph nautilus neoxt4 neutron odysseytestnet oortmainnet opbnb opbnbtestnet
+  opengradienttestnet optimism optimismsepolia orderly osmosis piccadilly plumetestnet polygon
+  polygonamoy polygonzkevm polynomialfi prom proofofplay pulsechain rarichain reactivekopli real
+  redstone rivalz ronin rootstockmainnet rootstocktestnet saakuru sanko scroll scrollsepolia sei
+  sepolia shibarium sketchpad smartbch snaxchain solanadevnet solanamainnet solanatestnet
+  soneium soneiumtestnet sonic sonictestnet
 )
+
 
 echo "Выберите сеть из списка:"
 select TARGET_CHAIN in "${NETWORKS[@]}"; do
