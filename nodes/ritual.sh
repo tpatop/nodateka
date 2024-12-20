@@ -83,8 +83,8 @@ change_settings() {
     TRAIL_HEAD_BLOCKS=${TRAIL_HEAD_BLOCKS:-1}
     read -p "Введите значение batch_size [1800]: " BATCH_SIZE
     BATCH_SIZE=${BATCH_SIZE:-1800}
-    read -p "Введите значение starting_sub_id [180000]: " STARTING_SUB_ID
-    STARTING_SUB_ID=${STARTING_SUB_ID:-180000}
+    read -p "Введите значение starting_sub_id [205000]: " STARTING_SUB_ID
+    STARTING_SUB_ID=${STARTING_SUB_ID:-205000}
 
     # Внесение изменений
     sed -i "s|\"sleep\":.*|\"sleep\": $SLEEP,|" "$HELLO_CONFIG_PATH"
