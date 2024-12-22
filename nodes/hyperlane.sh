@@ -17,7 +17,7 @@ source ~/.bashrc
 # Проверка и запрос HYPERLANE_PRIVATE_KEY
 if [ -z "$HYPERLANE_PRIVATE_KEY" ]; then
     echo "Переменная HYPERLANE_PRIVATE_KEY не установлена."
-    read -p "Введите значение для HYPERLANE_PRIVATE_KEY: " input_key
+    read -p "Введите значение для HYPERLANE_PRIVATE_KEY с 0x: " input_key
     if [ -z "$input_key" ]; then
         echo "Ошибка: HYPERLANE_PRIVATE_KEY не может быть пустым."
         exit 1
