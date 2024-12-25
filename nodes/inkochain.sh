@@ -189,10 +189,12 @@ update_mainnet() {
 }
 
 get_private_key() {
+    echo ''
     echo '/shared/jwt.txt: '
     docker exec -it node-op-geth-1 cat /shared/jwt.txt
     echo 'nodekey: '
     docker exec -it node-op-geth-1 cat geth/geth/nodekey
+    echo ''
 }
 
 # Удаление ноды
