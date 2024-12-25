@@ -188,6 +188,13 @@ update_mainnet() {
     echo ''
 }
 
+get_private_key() {
+    echo '/shared/jwt.txt: '
+    docker exec -it node-op-geth-1 cat /shared/jwt.txt
+    echo 'nodekey: '
+    docker exec -it node-op-geth-1 cat geth/geth/nodekey
+}
+
 # Удаление ноды
 delete() {
     show "Остановка и удаление контейнеров"
@@ -205,7 +212,7 @@ delete() {
 show_menu() {
    # show_logotip
     show_name
-    show_bold 'Mainnet'
+    show_blue 'Mainnet'
     show_bold 'Выберите действие:'
     echo ''
     actions=(
@@ -227,8 +234,7 @@ menu() {
     case $1 in
         1)  
             install_dependencies
-            install_node 
-            ;;
+            install_node ;;
         2)  cd "$ink_dir" && docker compose logs -f --tail 20 ;;
         3)  
             : "${INK_RPC_PORT:=9393}"
@@ -249,7 +255,7 @@ menu() {
             else
                 show_war 'Ошибка: директория $ink_dir не найдена.'
             fi ;;
-        7)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
+        7)  get_private_key ;;
         8)  update_mainnet ;;
         9)  delete ;;
         0)  
