@@ -92,116 +92,7 @@ clone_rep() {
     fi
 }
 
-# Функция установки ноды
-install_node() {
-    mkdir -p ~/ink && cd ~/ink
-    clone_rep
-
-    show "Переход в директорию узла..."
-    cd "$ink_dir" || {
-        show_war "Ошибка: директория node не найдена!"
-    }
-   
-    # Проверка и замена портов в docker-compose.yml
-    compose_file="$ink_dir/docker-compose.yml"
-    if [ -f "$compose_file" ]; then
-        show "Файл $compose_file найден. Проверка и настройка портов..."
-        docker compose down
-        # Массив с портами и их назначением
-        declare -A port_mapping=(
-            ["8545"]="8525"
-            ["8546"]="8526"
-            ["30303"]="30313"
-            ["9545"]="9515"
-            ["9222"]="9232"
-        )
-
-        for original_port in "${!port_mapping[@]}"; do
-            new_port=${port_mapping[$original_port]}
-            show "Проверка порта $new_port..."
-
-            # Если порт занят, запрос нового значения
-            while ss -tuln | grep -q ":$new_port "; do
-                show_war "Порт $new_port занят."
-                read -p "$(echo -e "${TERRACOTTA}${BOLD}Введите новый порт для замены $original_port (текущий: $new_port): ${NC}")" user_port
-                if [[ $user_port =~ ^[0-9]+$ && $user_port -ge 1 && $user_port -le 65535 ]]; then
-                    if ss -tuln | grep -q ":$user_port "; then
-                        show_war "Ошибка: введённый порт $user_port тоже занят. Попробуйте снова."
-                    else
-                        new_port=$user_port
-                        break  # Выход из цикла, если порт свободен
-                    fi
-                else
-                    show_war "Некорректный ввод. Попробуйте снова."
-                fi
-            done
-
-            # Замена порта в файле docker-compose.yml
-            sed -i "s|$original_port:|$new_port:|g" "$compose_file"
-            if [ "$original_port" -eq 8545 ]; then
-                export INK_RPC_PORT="$new_port"
-                echo "INK_RPC_PORT=$new_port" >> ~/.bashrc  # Сохранение в .bashrc для будущих сессий
-            fi
-            show_bold "Настройка порта завершена."
-            echo ''
-        done
-    fi
-
-    # Проверка и замена переменных в .env.ink-sepolia
-    env_file="$ink_dir/.env.ink-sepolia"
-    if [ -f "$env_file" ]; then
-        show "Файл $env_file найден. Замена переменных..."
-        read -p "$(echo -e "${TERRACOTTA}${BOLD}Введите URL для L1_RPC_URL ${NC}[Enter = https://ethereum-sepolia-rpc.publicnode.com]: ")" input_rpc
-        L1_RPC_URL=${input_rpc:-https://ethereum-sepolia-rpc.publicnode.com}
-
-        read -p "$(echo -e "${TERRACOTTA}${BOLD}Введите URL для L1_BEACON_URL ${NC}[Enter = https://ethereum-sepolia-beacon-api.publicnode.com]: ")" input_beacon
-        L1_BEACON_URL=${input_beacon:-https://ethereum-sepolia-beacon-api.publicnode.com}
-
-        sed -i "s|^L1_RPC_URL=.*|L1_RPC_URL=$L1_RPC_URL|" "$env_file"
-        sed -i "s|^L1_BEACON_URL=.*|L1_BEACON_URL=$L1_BEACON_URL|" "$env_file"
-        show_bold "Переменные успешно обновлены"
-        echo ''
-    else
-        show_war "Ошибка: файл $env_file не найден!"
-        exit 0
-    fi
-
-    # Запуск скрипта установки
-    if [ -x "./setup.sh" ]; then
-        show "Запускаю скрипт установки..."
-        ./setup.sh
-        show "Удаление архива снепшота"
-        rm -f *.tar.gz
-    else
-        show_war "Ошибка: setup.sh не найден или не является исполняемым!"
-        exit 1
-    fi
-
-    # Фикс проблемы с правами на доступ к директории
-    sudo mkdir -p "$ink_dir/geth"
-    sudo chown -R 1000:1000 "$ink_dir/geth"
-    sudo chmod -R 755 "$ink_dir/geth"
-
-    # Запуск Docker Compose
-    show "Запуск ноды..."
-    docker compose up -d || {
-        show "Перезапуск Docker Compose..."
-        docker compose down && docker compose up -d || {
-            show_war "Ошибка при повторном запуске Docker Compose!"
-            exit 1
-        }
-    }
-    show_bold "Установка и запуск выполнены успешно!"
-    echo ''
-}
-
-# Обновление узла до mainnet
-update_mainnet() {
-    show "Обновление узла до mainnet..."
-    cd "$ink_dir" && docker compose down
-    rm -rf "$ink_dir/geth/chaindata" && mkdir -p "$ink_dir/geth/chaindata"
-    git stash && git pull
-
+create_env_file() {
     show "Добавление переменных в .env..."
     cat > "$ink_dir/.env" <<EOL
 # ("ink-mainnet", "ink-sepolia", etc.)
@@ -252,6 +143,41 @@ PORT__OP_GETH_P2P=33393
 PORT__OP_NODE_P2P=9303
 PORT__OP_NODE_HTTP=9345
 EOL
+}
+
+# Функция установки ноды
+install_node() {
+    mkdir -p ~/ink && cd ~/ink
+    clone_rep
+
+    show "Переход в директорию узла..."
+    cd "$ink_dir" || {
+        show_war "Ошибка: директория node не найдена!"
+    }
+   
+   create_env_file
+
+    # Запуск Docker Compose
+    show "Запуск ноды..."
+    docker compose up -d || {
+        show "Перезапуск Docker Compose..."
+        docker compose down && docker compose up -d || {
+            show_war "Ошибка при повторном запуске Docker Compose!"
+            exit 1
+        }
+    }
+    show_bold "Установка и запуск выполнены успешно!"
+    echo ''
+}
+
+# Обновление узла до mainnet
+update_mainnet() {
+    show "Обновление узла до mainnet..."
+    cd "$ink_dir" && docker compose down
+    rm -rf "$ink_dir/geth/chaindata" && mkdir -p "$ink_dir/geth/chaindata"
+    git stash && git pull
+
+    create_env_file
 
     show "Запуск Docker Compose..."
     docker compose up -d --build || {
@@ -279,12 +205,13 @@ delete() {
 show_menu() {
    # show_logotip
     show_name
+    show_bold 'Mainnet'
     show_bold 'Выберите действие:'
     echo ''
     actions=(
         "1. Установить ноду"
         "2. Просмотр логов ноды"
-        "3. Тестовый запрос к ноде"
+        "3. Запрос к ноде"
         "4. Проверка контейнеров"
         "7. Вывод приватного ключа"
         "8. Обновить узел до mainnet"
@@ -304,10 +231,10 @@ menu() {
             ;;
         2)  cd "$ink_dir" && docker compose logs -f --tail 20 ;;
         3)  
-            : "${INK_RPC_PORT:=8525}"
+            : "${INK_RPC_PORT:=9393}"
             if ! command -v jq &>/dev/null; then
                 show_war 'Ошибка: jq не установлен. Установите его с помощью: sudo apt install jq'
-                exit 1
+                exit 0
             fi
             if curl -s http://localhost:"$INK_RPC_PORT" &>/dev/null; then
                 curl -s -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
