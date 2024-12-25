@@ -195,6 +195,73 @@ install_node() {
     echo ''
 }
 
+# Обновление узла до mainnet
+update_mainnet() {
+    show "Обновление узла до mainnet..."
+    cd "$ink_dir" && docker compose down
+    rm -rf "$ink_dir/geth/chaindata" && mkdir -p "$ink_dir/geth/chaindata"
+    git stash && git pull
+
+    show "Добавление переменных в .env..."
+    cat > "$ink_dir/.env" <<EOL
+# ("ink-mainnet", "ink-sepolia", etc.)
+NETWORK_NAME=ink-mainnet
+
+# ("full" or "archive"), note that "archive" is 10x bigger
+NODE_TYPE=full
+
+# Вставь сюда свои OP_NODE__RPC_ENDPOINT и OP_NODE__L1_BEACON
+OP_NODE__RPC_ENDPOINT=https://ethereum-rpc.publicnode.com
+OP_NODE__L1_BEACON=https://eth-beacon-chain.drpc.org/rest/
+
+# alchemy -Alchemy, quicknode -Quicknode, erigon -Erigon, basic -Other providers
+OP_NODE__RPC_TYPE=basic
+
+# https://rpc-gel-sepolia.inkonchain.com for ink-sepolia or https://rpc-gel.inkonchain.com for ink-mainnet)
+HEALTHCHECK__REFERENCE_RPC_PROVIDER=https://rpc-gel.inkonchain.com
+
+###############################################################################
+#                                ↓ OPTIONAL ↓                                 #
+###############################################################################
+
+# snap - Snap Sync (Default), full - Full Sync (For archive node)
+OP_GETH__SYNCMODE=snap
+
+# Feel free to customize your image tag if you want, uses "latest" by default
+# See here for all available images: https://hub.docker.com/u/ethereumoptimism
+IMAGE_TAG__DTL=
+IMAGE_TAG__HEALTCHECK=
+IMAGE_TAG__PROMETHEUS=
+IMAGE_TAG__GRAFANA=
+IMAGE_TAG__INFLUXDB=
+IMAGE_TAG__OP_GETH=
+IMAGE_TAG__OP_NODE=
+
+# Exposed server ports (must be unique)
+# See docker-compose.yml for default values
+PORT__DTL=33391
+PORT__HEALTHCHECK_METRICS=7301
+PORT__PROMETHEUS=9390
+PORT__GRAFANA=3301
+PORT__INFLUXDB=8386
+PORT__TORRENT_UI=33396
+PORT__TORRENT=33398
+PORT__OP_GETH_HTTP=9393
+PORT__OP_GETH_WS=33394
+PORT__OP_GETH_P2P=33393
+PORT__OP_NODE_P2P=9303
+PORT__OP_NODE_HTTP=9345
+EOL
+
+    show "Запуск Docker Compose..."
+    docker compose up -d --build || {
+        show_war "Ошибка при запуске Docker Compose!"
+        exit 1
+    }
+    show_bold "Узел успешно обновлён до mainnet!"
+    echo ''
+}
+
 # Удаление ноды
 delete() {
     show "Остановка и удаление контейнеров"
@@ -219,7 +286,8 @@ show_menu() {
         "2. Просмотр логов ноды"
         "3. Тестовый запрос к ноде"
         "4. Проверка контейнеров"
-        "8. Вывод приватного ключа"
+        "7. Вывод приватного ключа"
+        "8. Обновить узел до mainnet"
         "9. Удаление ноды"
         "0. Выход"
     )
@@ -254,7 +322,8 @@ menu() {
             else
                 show_war 'Ошибка: директория $ink_dir не найдена.'
             fi ;;
-        8)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
+        7)  cat "$ink_dir/var/secrets/jwt.txt" && echo "" ;;
+        8)  update_mainnet ;;
         9)  delete ;;
         0)  
             echo -en "${TERRACOTTA}${BOLD}Присоединяйся к Нодатеке, будем ставить ноды вместе! ${NC}${LIGHT_BLUE}https://t.me/cryptotesemnikov/778${NC}\n"
