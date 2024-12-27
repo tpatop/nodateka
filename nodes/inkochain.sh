@@ -167,6 +167,7 @@ install_node() {
         }
     }
     show_bold "Установка и запуск выполнены успешно!"
+    show_blue "Проверь статус по ссылке: http://your_server_ip_address:3301/ - admin ink"
     echo ''
 }
 
