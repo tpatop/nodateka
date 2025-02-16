@@ -1,7 +1,7 @@
 #!/bin/bash
 
 change_rpc() {
-  if [ -f ".env.mainnet" ]; then
+  if [ -f "$HOME/unichain-node/.env.mainnet" ]; then
     read -p "Изменить адреса RPC? [y/N]: " confirm
     confirm=${confirm,,} # Приводим к нижнему регистру
     if [[ "$confirm" == "y" ]]; then
@@ -14,8 +14,8 @@ change_rpc() {
         beacon="https://ethereum-beacon-api.publicnode.com"
     fi
     
-    sed -i "s|^OP_NODE_L1_ETH_RPC=.*|OP_NODE_L1_ETH_RPC=$eth_rpc|" .env.mainnet
-    sed -i "s|^OP_NODE_L1_BEACON=.*|OP_NODE_L1_BEACON=$beacon|" .env.mainnet
+    sed -i "s|^OP_NODE_L1_ETH_RPC=.*|OP_NODE_L1_ETH_RPC=$eth_rpc|" $HOME/unichain-node/.env.mainnet
+    sed -i "s|^OP_NODE_L1_BEACON=.*|OP_NODE_L1_BEACON=$beacon|" $HOME/unichain-node/.env.mainnet
     echo 'Изменение RPC успешно применено!'
   else
     echo "Ошибка: файл .env.mainnet не найден!"; exit 1;
@@ -24,14 +24,13 @@ change_rpc() {
 
 # Функция изменения настроек узла
  change_settings() {
-  cd ~/unichain-node
-  if [ -f "docker-compose.yml" ]; then
-    sed -i 's|30303:|33303:|g' docker-compose.yml
-    sed -i 's|8545:|8945:|g' docker-compose.yml
-    sed -i 's|8546:|8946:|g' docker-compose.yml
-    sed -i 's/^#\s\+- .env.mainnet/      - .env.mainnet/' docker-compose.yml
+  if [ -f "$HOME/unichain-node/docker-compose.yml" ]; then
+    sed -i 's|30303:|33303:|g' $HOME/unichain-node/docker-compose.yml
+    sed -i 's|8545:|8945:|g' $HOME/unichain-node/docker-compose.yml
+    sed -i 's|8546:|8946:|g' $HOME/unichain-node/docker-compose.yml
+    sed -i 's/^#\s\+- .env.mainnet/      - .env.mainnet/' $HOME/unichain-node/docker-compose.yml
   else
-    echo "Ошибка: файл docker-compose.yml не найден!"; exit 1;
+    echo "Ошибка: файл docker-compose.yml не найден!"; exit 0;
   fi
  }
 
@@ -41,16 +40,19 @@ install_node() {
   bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
 
   echo "Клонирование репозитория Uniswap unichain-node..."
-  git clone https://github.com/Uniswap/unichain-node || {
+  # Удаление директории при наличии
+  if [ -d "$HOME/unichain-node" ]; then
+    delete_node
+  fi
+  # Скачивание директории проекта
+  git clone https://github.com/Uniswap/unichain-node "$HOME/unichain-node" || {
     echo "Ошибка при клонировании репозитория!"; exit 1;
   }
-
-  cd ~/unichain-node
-
   # Изменение настроек
   change_settings
   change_rpc
-  docker compose up -d || {
+  # Запуск Docker Compose
+  docker compose -f "$HOME/unichain-node/docker-compose.yml" up -d || {
     echo "Ошибка при запуске Docker Compose!"; exit 1;
   }
   echo "Установка выполнена успешно!"
@@ -58,36 +60,38 @@ install_node() {
 
 # Функция обновления узла до mainnet
 update_node_to_mainnet() {
-  echo "Обновление до mainnet"
-  # Делаем бекап приватного ключа
-  if [ -f ~/unichain-node/geth-data/geth/nodekey ]; then
-    cp ~/unichain-node/geth-data/geth/nodekey ~/unichain-nodekey-backup
+  if [ -d $HOME/unichain-node ]; then
+    echo "Обновление до mainnet"
+    # Делаем бекап приватного ключа
+    if [ -f $HOME/unichain-node/geth-data/geth/nodekey ]; then
+      cp $HOME/unichain-node/geth-data/geth/nodekey ~/unichain-nodekey-backup
+    else
+      echo "Приватный ключ не найден!"
+      exit 0
+    fi
+    # Удаляем ноду
+    delete_node
+    # Скачиваем директорию проекта
+    git clone https://github.com/Uniswap/unichain-node || {
+      echo "Ошибка при клонировании репозитория!"; exit 0;
+    }
+    # Вносим необходимые изменения в файлы проекта
+    change_settings
+    change_rpc
+    # Запускаем узел для инициализации необходимых файлов
+    docker compose -f $HOME/unichain-node/docker-compose.yml up -d
+    # Выключаем узел для внесения изменений
+    docker compose -f $HOME/unichain-node/docker-compose.yml down --volumes
+    # Удаляем старый ключ и восстанавливаем новый
+    rm $HOME/unichain-node/geth-data/geth/nodekey  
+    cp ~/unichain-nodekey-backup $HOME/unichain-node/geth-data/geth/nodekey
+    # Запускаем узел
+    docker compose -f $HOME/unichain-node/docker-compose.yml up -d
+    echo ''
+    echo 'Поздравляю с запуском MAINNET UNICHAIN NODE!'
   else
-    echo "Приватный ключ не найден!"
-    exit 1
+    echo 'Проект не запущен, установите его!'
   fi
-  # Выключаем узел
-  docker compose -f ~/unichain-node/docker-compose.yml down --volumes
-  # Удаляем директорию
-  rm -rf ~/unichain-node
-  # Скачиваем директорию проекта
-  git clone https://github.com/Uniswap/unichain-node || {
-    echo "Ошибка при клонировании репозитория!"; exit 1;
-  }
-  # Вносим необходимые изменения в файлы проекта
-  change_settings
-  change_rpc
-  # Запускаем узел для инициализации необходимых файлов
-  docker compose up -d
-  # Выключаем узел для внесения изменений
-  docker compose down --volumes
-  # Удаляем старый ключ и восстанавливаем новый
-  rm ~/unichain-node/geth-data/geth/nodekey  
-  cp ~/unichain-nodekey-backup ~/unichain-node/geth-data/geth/nodekey
-  # Запускаем узел
-  docker compose up -d
-  echo ''
-  echo 'Поздравляю с запуском MAINNET UNICHAIN NODE!'
 }
 
 # Функция обновления узла
@@ -97,7 +101,8 @@ update_node() {
   git stash && git pull
   change_settings
   change_rpc
-  docker compose down && docker compose up -d || {
+  docker compose -f $HOME/unichain-node/docker-compose.yml down && \
+  docker compose -f $HOME/unichain-node/docker-compose.yml up -d || {
     echo "Ошибка при запуске Docker Compose!"; exit 0;
   }
   echo "Обновление узла прошло успешно!"
@@ -112,15 +117,15 @@ send_test_request() {
 # Функция отображения логов ноды
 show_logs() {
   echo "Просмотр логов ноды..."
-  docker compose -f ~/unichain-node/docker-compose.yml logs -f --tail 20
+  docker compose -f $HOME/unichain-node/docker-compose.yml logs -f --tail 20
 }
 
 # Функция вывода приватного ключа
 show_private_key() {
   echo "Вывод приватного ключа..."
-  if [ -f ~/unichain-node/geth-data/geth/nodekey ]; then
+  if [ -f $HOME/unichain-node/geth-data/geth/nodekey ]; then
     echo ''
-    cat ~/unichain-node/geth-data/geth/nodekey
+    cat $HOME/unichain-node/geth-data/geth/nodekey
     echo ''
   else
     echo "Приватный ключ не найден!"
@@ -130,7 +135,7 @@ show_private_key() {
 # Функция удаления ноды
 delete_node() {
   echo "Удаление ноды..."
-  docker compose -f ~/unichain-node/docker-compose.yml down --volumes
+  docker compose -f $HOME/unichain-node/docker-compose.yml down --volumes
   rm -rf ~/unichain-node
   echo "Нода успешно удалена."
 }
