@@ -29,6 +29,7 @@ change_rpc() {
     sed -i 's|30303:|33303:|g' docker-compose.yml
     sed -i 's|8545:|8945:|g' docker-compose.yml
     sed -i 's|8546:|8946:|g' docker-compose.yml
+    sed -i 's/^#\s\+- .env.mainnet/      - .env.mainnet/' docker-compose.yml
   else
     echo "Ошибка: файл docker-compose.yml не найден!"; exit 1;
   fi
@@ -97,7 +98,7 @@ update_node() {
   change_settings
   change_rpc
   docker compose down && docker compose up -d || {
-    echo "Ошибка при запуске Docker Compose!"; exit 1;
+    echo "Ошибка при запуске Docker Compose!"; exit 0;
   }
   echo "Обновление узла прошло успешно!"
 }
