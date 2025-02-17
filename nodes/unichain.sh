@@ -180,6 +180,7 @@ show_menu() {
 
 # Основной цикл программы
 while true; do
+  bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
   show_menu
   read -p "Ваш выбор: " choice
   case $choice in
