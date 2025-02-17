@@ -59,9 +59,9 @@ install_node() {
 }
 
 # Функция обновления узла до mainnet
-update_node_to_mainnet() {
+update_node() {
   if [ -d $HOME/unichain-node ]; then
-    echo "Обновление до mainnet"
+    echo "Обновление ноды до последней версии"
     # Делаем бекап приватного ключа
     if [ -f $HOME/unichain-node/geth-data/geth/nodekey ]; then
       cp $HOME/unichain-node/geth-data/geth/nodekey ~/unichain-nodekey-backup
@@ -95,18 +95,18 @@ update_node_to_mainnet() {
 }
 
 # Функция обновления узла
-update_node() {
-  echo "Обновление узла (op-node:v1.11.1-rc.1)..."
-  cd ~/unichain-node
-  git stash && git pull
-  change_settings
-  change_rpc
-  docker compose -f $HOME/unichain-node/docker-compose.yml down --volumes && \
-  docker compose -f $HOME/unichain-node/docker-compose.yml up -d || {
-    echo "Ошибка при запуске Docker Compose!"; exit 0;
-  }
-  echo "Обновление узла прошло успешно!"
-}
+# update_node() {
+#   echo "Обновление узла (op-node:v1.11.1-rc.1)..."
+#   cd ~/unichain-node
+#   git stash && git pull
+#   change_settings
+#   change_rpc
+#   docker compose -f $HOME/unichain-node/docker-compose.yml down --volumes && \
+#   docker compose -f $HOME/unichain-node/docker-compose.yml up -d || {
+#     echo "Ошибка при запуске Docker Compose!"; exit 0;
+#   }
+#   echo "Обновление узла прошло успешно!"
+# }
 
 # Функция тестового запроса
 send_test_request() {
@@ -167,11 +167,11 @@ show_menu() {
   echo ""
   echo "Выберите действие:"
   echo "1. Установка ноды (mainnet)"
-  echo "2. Обновление узла (15.02.2025)"
+  echo "2. Обновление узла до последней актуальной версии"
   echo "3. Тестовый запрос"
   echo "4. Логи ноды"
   echo "5. Сменить RPC"
-  echo "6. Переход с testnet в mainnet"
+  # echo "6. Переход с testnet в mainnet"
   echo "7. Изменить приватный ключ"
   echo "8. Вывод приватного ключа"
   echo "9. Удаление ноды"
@@ -189,13 +189,17 @@ while true; do
     4) show_logs ;;
     5) 
       change_rpc 
-      docker compose -f $HOME/unichain-node/docker-compose.yml down && \
-      docker compose -f $HOME/unichain-node/docker-compose.yml up -d || {
-        echo "Ошибка при запуске Docker Compose!"
+      docker compose -f $HOME/unichain-node/docker-compose.yml up -d --force-recreate || {
+        echo "Ошибка при перезапуске контейнеров!"
         continue
       } ;;
-    6) update_node_to_mainnet ;;
-    7) change_private_key ;;
+    # 6) update_node_to_mainnet ;;
+    7) 
+      change_private_key 
+      docker compose -f $HOME/unichain-node/docker-compose.yml up -d --force-recreate || {
+        echo "Ошибка при перезапуске контейнеров!"
+        continue
+      } ;;
     8) show_private_key ;;
     9) delete_node ;;
     0) echo "Выход."; break ;;
