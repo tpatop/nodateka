@@ -50,7 +50,7 @@ install_node() {
   }
   # Изменение настроек
   change_settings
-  change_rpc
+  # change_rpc
   # Запуск Docker Compose
   docker compose -f "$HOME/unichain-node/docker-compose.yml" up -d || {
     echo "Ошибка при запуске Docker Compose!"; exit 0;
@@ -77,7 +77,7 @@ update_node() {
     }
     # Вносим необходимые изменения в файлы проекта
     change_settings
-    change_rpc
+    # change_rpc
     # Запускаем узел для инициализации необходимых файлов
     docker compose -f $HOME/unichain-node/docker-compose.yml up -d
     # Выключаем узел для внесения изменений
