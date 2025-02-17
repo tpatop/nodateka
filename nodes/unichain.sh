@@ -18,7 +18,7 @@ change_rpc() {
     sed -i "s|^OP_NODE_L1_BEACON=.*|OP_NODE_L1_BEACON=$beacon|" $HOME/unichain-node/.env.mainnet
     echo 'Изменение RPC успешно применено!'
   else
-    echo "Ошибка: файл .env.mainnet не найден!"; exit 1;
+    echo "Ошибка: файл .env.mainnet не найден!"; exit 0;
   fi
 }
 
@@ -46,14 +46,14 @@ install_node() {
   fi
   # Скачивание директории проекта
   git clone https://github.com/Uniswap/unichain-node "$HOME/unichain-node" || {
-    echo "Ошибка при клонировании репозитория!"; exit 1;
+    echo "Ошибка при клонировании репозитория!"; exit 0;
   }
   # Изменение настроек
   change_settings
   change_rpc
   # Запуск Docker Compose
   docker compose -f "$HOME/unichain-node/docker-compose.yml" up -d || {
-    echo "Ошибка при запуске Docker Compose!"; exit 1;
+    echo "Ошибка при запуске Docker Compose!"; exit 0;
   }
   echo "Установка выполнена успешно!"
 }
@@ -101,7 +101,7 @@ update_node() {
   git stash && git pull
   change_settings
   change_rpc
-  docker compose -f $HOME/unichain-node/docker-compose.yml down && \
+  docker compose -f $HOME/unichain-node/docker-compose.yml down --volumes && \
   docker compose -f $HOME/unichain-node/docker-compose.yml up -d || {
     echo "Ошибка при запуске Docker Compose!"; exit 0;
   }
@@ -132,6 +132,28 @@ show_private_key() {
   fi
 }
 
+# Функция вывода приватного ключа
+change_private_key() {
+  echo "Вывод приватного ключа..."
+  NODEKEY_PATH="$HOME/unichain-node/geth-data/geth/nodekey"
+  if [ -f "$NODEKEY_PATH" ]; then
+    echo "Приватный ключ найден и будет заменён."
+    rm "$NODEKEY_PATH"
+  else
+    echo "Приватный ключ не найден, создадим новый."
+  fi
+  # Ввод нового ключа
+  read -p "Введите новый приватный ключ: " NEW_KEY
+  # Проверка, что ключ введён
+  if [[ -z "$NEW_KEY" ]]; then
+    echo "Ошибка: приватный ключ не может быть пустым!"
+    return 1
+  fi
+  # Запись нового ключа в файл
+  echo "$NEW_KEY" > "$NODEKEY_PATH"
+  echo "Приватный ключ успешно изменён."
+}
+
 # Функция удаления ноды
 delete_node() {
   echo "Удаление ноды..."
@@ -148,7 +170,9 @@ show_menu() {
   echo "2. Обновление узла (15.02.2025)"
   echo "3. Тестовый запрос"
   echo "4. Логи ноды"
-  echo "7. Переход с testnet в mainnet"
+  echo "5. Сменить RPC"
+  echo "6. Переход с testnet в mainnet"
+  echo "7. Изменить приватный ключ"
   echo "8. Вывод приватного ключа"
   echo "9. Удаление ноды"
   echo "0. Выход"
@@ -156,7 +180,6 @@ show_menu() {
 
 # Основной цикл программы
 while true; do
-  bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
   show_menu
   read -p "Ваш выбор: " choice
   case $choice in
@@ -164,7 +187,15 @@ while true; do
     2) update_node ;;
     3) send_test_request ;;
     4) show_logs ;;
-    7) update_node_to_mainnet ;;
+    5) 
+      change_rpc 
+      docker compose -f $HOME/unichain-node/docker-compose.yml down && \
+      docker compose -f $HOME/unichain-node/docker-compose.yml up -d || {
+        echo "Ошибка при запуске Docker Compose!"
+        continue
+      } ;;
+    6) update_node_to_mainnet ;;
+    7) change_private_key ;;
     8) show_private_key ;;
     9) delete_node ;;
     0) echo "Выход."; break ;;
