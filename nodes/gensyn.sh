@@ -3,13 +3,6 @@
 NODE_DIR="$HOME/rl-swarm"
 DOCKER_COMPOSE_FILE="$NODE_DIR/docker-compose.yaml"
 
-
-logotip() {
-    echo ""
-    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
-    echo ""
-}
-
 find_free_port() {
     local port=8080
     while ss -tuln | grep -q ":$port " ; do
@@ -24,6 +17,9 @@ install_node() {
     echo "2) Без GPU"
     read -p "Введите номер режима: " MODE
     
+    # Установка логотипа
+    bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/name.sh)
+    
     # Установка Docker
     bash <(curl -s https://raw.githubusercontent.com/tpatop/nodateka/refs/heads/main/basic/admin/docker.sh)
     
@@ -33,7 +29,7 @@ install_node() {
                         libleveldb-dev tar clang bsdmainutils ncdu unzip libleveldb-dev
     
     git clone https://github.com/gensyn-ai/rl-swarm.git $NODE_DIR
-    cd $NODE_DIR || exit 1
+    cd $NODE_DIR || { echo "Ошибка: директория $NODE_DIR не найдена."; return; }
     
     FREE_PORT=$(find_free_port)
     echo "Используем свободный порт: $FREE_PORT"
@@ -94,29 +90,31 @@ EOF
 }
 
 view_logs() {
-    cd $NODE_DIR || exit 1
+    [ -d "$NODE_DIR" ] || { echo "Ошибка: директория $NODE_DIR не найдена."; return; }
+    cd $NODE_DIR
     docker-compose logs -f swarm_node
 }
 
 status_containers() {
-    cd $NODE_DIR || exit 1
+    [ -d "$NODE_DIR" ] || { echo "Ошибка: директория $NODE_DIR не найдена."; return; }
+    cd $NODE_DIR
     docker-compose ps
 }
 
 delete_node() {
-    cd $NODE_DIR || exit 1
+    [ -d "$NODE_DIR" ] || { echo "Ошибка: директория $NODE_DIR не найдена."; return; }
+    cd $NODE_DIR
     docker compose down
     rm -rf $NODE_DIR
     echo "Нода удалена."
 }
 
 while true; do
-    logotip
-    echo "Выберите действие:"
+    echo "\nВыберите действие:"
     echo "1) Установить ноду"
     echo "2) Посмотреть логи"
     echo "3) Статус контейнеров"
-    echo "9) Удалить ноду"
+    echo "4) Удалить ноду"
     echo "0) Выйти из скрипта"
     read -p "Введите номер действия: " ACTION
 
@@ -124,7 +122,7 @@ while true; do
         1) install_node ;;
         2) view_logs ;;
         3) status_containers ;;
-        9) delete_node ;;
+        4) delete_node ;;
         0) echo "Выход..."; exit 0 ;;
         *) echo "Неверный ввод. Попробуйте снова." ;;
     esac
